@@ -107,10 +107,11 @@ if ($opt->manual) {
     local $| = 1;
     my $dice = $_[0];
     $dice .= " for $_[1]" if $_[1];
-    print "rolling $dice: ";
+    my $default = roll($_[0]);
+    print "rolling $dice [$default]: ";
     my $result = <STDIN>;
     chomp $result;
-    $result = roll($_[0]) unless length $result;
+    $result = $default unless length $result;
     return $result;
   };
 } else {
