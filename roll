@@ -14,11 +14,11 @@ sub resolve_monster {
   my $data = YAML::Tiny->read("monsters/$path");
   die $YAML::Tiny::errstr unless $data;
   my $main = shift @$data;
-  # use Data::Dumper; warn Dumper($main);
   my $name = $main->{Name};
   my $num_dice = $main->{Stats}{'No. Appearing'};
   $num_dice = $num_dice->{wandering} if ref $num_dice;
-  my $num = $ROLLER->($num_dice, "number of $name");
+  my $num = $num_dice =~ /d/ ? $ROLLER->($num_dice, "number of $name")
+                             : $num_dice;
 
   my @hd = split /\s+/, $main->{Stats}{'Hit Dice'};
   my $hd = do { local $" = ''; "$hd[0]d8@hd[ 1 .. $#hd]" };
