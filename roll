@@ -21,8 +21,8 @@ sub resolve_monster {
   my $num = $ROLLER->($num_dice, "number of $name");
 
   my @hd = split /\s+/, $main->{Stats}{'Hit Dice'};
-  my $hd = "$hd[0]d8@hd[ 1 .. $#hd]";
-  my @hp = map { $ROLLER->($_, "$name \#$_ hp") } 1 .. $num;
+  my $hd = do { local $" = ''; "$hd[0]d8@hd[ 1 .. $#hd]" };
+  my @hp = map { $ROLLER->($hd, "$name \#$_ hp") } 1 .. $num;
 
   my %extra;
   for my $extra (@$data) {
@@ -75,16 +75,26 @@ sub roll_table {
 
   my $method = $type eq 'M' ? 'resolve_monster'
              : $type eq 'T' ? 'resolve_table'
+             : $type eq 'x' ? 'resolve_multi'
              : $type eq '=' ? sub { $_[1] }
              :                sub { $_[1] };
 
-  my $text = $self->$method($rest);
+  my $text = $self->$method($rest, $table, $name);
 
   return {
     dice => $result,
     text => $text,
     type => $type,
   };
+}
+
+sub resolve_multi {
+  my ($self, $x, $table, $name) = @_;
+  # XXX: no, this should get a list of [ $table, $name ] tuples to combine or
+  # something -- rjbs, 2012-11-27
+
+  my @results = map { $self->roll_table($table, $name) } (1 .. $x);
+  return join "\n", map {; $_->{text} } @results;
 }
 
 my ($opt, $usage) = describe_options(
@@ -100,6 +110,7 @@ if ($opt->manual) {
     print "rolling $dice: ";
     my $result = <STDIN>;
     chomp $result;
+    $result = roll($_[0]) unless length $result;
     return $result;
   };
 } else {
