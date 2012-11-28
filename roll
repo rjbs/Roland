@@ -1,0 +1,113 @@
+#!/bin/env perl
+use 5.12.0;
+use warnings;
+
+use Games::Dice qw(roll);
+use Getopt::Long::Descriptive;
+use List::AllUtils qw(sum);
+use YAML::Tiny;
+
+my $ROLLER;
+
+sub resolve_monster {
+  my ($self, $path) = @_;
+  my $data = YAML::Tiny->read("monsters/$path");
+  die $YAML::Tiny::errstr unless $data;
+  my $main = shift @$data;
+  # use Data::Dumper; warn Dumper($main);
+  my $name = $main->{Name};
+  my $num_dice = $main->{Stats}{'No. Appearing'};
+  $num_dice = $num_dice->{wandering} if ref $num_dice;
+  my $num = $ROLLER->($num_dice, "number of $name");
+
+  my @hd = split /\s+/, $main->{Stats}{'Hit Dice'};
+  my $hd = "$hd[0]d8@hd[ 1 .. $#hd]";
+  my @hp = map { $ROLLER->($_, "$name \#$_ hp") } 1 .. $num;
+
+  my %extra;
+  for my $extra (@$data) {
+    my $desc = $extra->{description};
+    my $result = $self->roll_table($extra, "$name/$desc");
+    $extra{ $desc } = $result->{text};
+  }
+
+my $text = <<"END_MONSTER";
+
+  $name
+  No. Appearing: $num
+  Hit points: @hp
+END_MONSTER
+
+  for my $key (sort keys %extra) {
+    $text .= "  $key: $extra{ $key }\n";
+  }
+
+  return $text
+}
+
+sub resolve_table { goto &roll_table_file }
+
+sub roll_table_file {
+  my ($self, $fn) = @_;
+  my $data = YAML::Tiny->read($fn);
+  die $YAML::Tiny::errstr unless $data;
+  $self->roll_table( $data->[0], $fn );
+}
+
+sub roll_table {
+  my ($self, $table, $name) = @_;
+  $name //= "?";
+  my @dice_str = split / \+ /, $table->{dice};
+  my $result = sum 0, map { $ROLLER->($_, $name) } @dice_str;
+
+  my %case;
+  for my $key (keys %{ $table->{results} }) {
+    if ($key =~ /-/) {
+      my ($min, $max) = split /-/, $key;
+      $case{ $_ } = $table->{results}{$key} for $min .. $max;
+    } else {
+      $case{ $key } = $table->{results}{$key};
+    }
+  }
+
+  my $payload = $case{ $result };
+  my ($type, $rest) = split /\s+/, $payload, 2;
+
+  my $method = $type eq 'M' ? 'resolve_monster'
+             : $type eq 'T' ? 'resolve_table'
+             : $type eq '=' ? sub { $_[1] }
+             :                sub { $_[1] };
+
+  my $text = $self->$method($rest);
+
+  return {
+    dice => $result,
+    text => $text,
+    type => $type,
+  };
+}
+
+my ($opt, $usage) = describe_options(
+  '%c %o <table>',
+  [ 'manual|m', 'enter die rolls manually' ],
+);
+
+if ($opt->manual) {
+  $ROLLER = sub {
+    local $| = 1;
+    my $dice = $_[0];
+    $dice .= " for $_[1]" if $_[1];
+    print "rolling $dice: ";
+    my $result = <STDIN>;
+    chomp $result;
+    return $result;
+  };
+} else {
+  $ROLLER = \&roll;
+}
+
+my $result = main->roll_table_file($ARGV[0]);
+
+say "rolled on $ARGV[0]";
+say "rolled: $result->{dice}";
+say "result: ($result->{type}) $result->{text}";
