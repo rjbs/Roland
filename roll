@@ -44,7 +44,7 @@ sub xp_for_monster {
   my ($self, $monster) = @_;
   my $bonuses = @{ $monster->{'XP Bonuses'} // [] };
 
-  my $hd = $monster->{Stats}{'Hit Dice'};
+  return 0 unless my $hd = $monster->{Stats}{'Hit Dice'};
   my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
   $bonus = ($sign || $bonus) ? "$sign$bonus" : 0;
 
@@ -69,20 +69,22 @@ sub resolve_monster {
   my $data = YAML::Tiny->read("monsters/$path");
   die $YAML::Tiny::errstr unless $data;
   my $main = shift @$data;
-  my $name = $main->{Name};
-  my $num_dice = $main->{Stats}{'No. Appearing'};
+  my $name = $main->{Name} // $path;
+  my $num_dice = $main->{Stats}{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/ ? $ROLLER->($num_dice, "number of $name")
                              : $num_dice;
 
-  my $HD = $main->{Stats}{'Hit Dice'};
+  my $HD = $main->{Stats}{'Hit Dice'} // '?';
   my @hd = split /\s+/, $HD;
   my $hd = do {
     local $" = '';
     my $d = $hd[0] !~ /d/ ? 'd8' : '';
     "$hd[0]$d@hd[ 1 .. $#hd]"
   };
-  my @hp = map { $ROLLER->($hd, "$name \#$_ hp") } 1 .. $num;
+  my @hp = $num eq '?'
+         ? ()
+         : map { $ROLLER->($hd, "$name \#$_ hp") } 1 .. $num;
 
   my %extra;
   for my $extra (@$data) {
@@ -91,18 +93,19 @@ sub resolve_monster {
     $extra{ $desc } = $result->{text};
   }
 
-  my $ac = $main->{Stats}{'Armor Class'};
-  my $mv = $main->{Stats}{Movement};
+  my $ac  = $main->{Stats}{'Armor Class'} // '?';
+  my $mv  = $main->{Stats}{Movement}      // '?';
+  my $dmg = $main->{Stats}{Damage}        // '?';
 
-  my $xp   = $self->xp_for_monster($main);
-  my $xp_t = $num * $xp;
+  my $xp   = $self->xp_for_monster($main) || '?';
+  my $xp_t = $xp eq '?' ? '?' : $num * $xp;
 
 my $text = <<"END_MONSTER";
 
   $name
   No. Appearing: $num
   Hit points: ($HD HD) @hp
-  Stats: [ AC $ac, Mv $mv, Dmg $main->{Stats}{Damage} ]
+  Stats: [ AC $ac, Mv $mv, Dmg $dmg ]
   Total XP: $xp_t ($num x $xp xp)
 END_MONSTER
 
