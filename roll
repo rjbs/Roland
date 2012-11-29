@@ -11,6 +11,7 @@ my $ROLLER;
 
 sub resolve_monster {
   my ($self, $path) = @_;
+  return "(missing file, monsters/$path)" unless -e "monsters/$path"; # XXX
   my $data = YAML::Tiny->read("monsters/$path");
   die $YAML::Tiny::errstr unless $data;
   my $main = shift @$data;
