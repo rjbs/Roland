@@ -125,7 +125,12 @@ if ($opt->manual) {
     return $result;
   };
 } else {
-  $ROLLER = \&roll;
+  $ROLLER = sub {
+    my ($dice, $desc) = @_;
+    my $result = roll($dice);
+    print "rolled $dice for $desc: $result\n";
+    return $result;
+  };
 }
 
 my $result = main->roll_table_file($ARGV[0]);
