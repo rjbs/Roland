@@ -193,6 +193,7 @@ sub resolve_multi {
 my ($opt, $usage) = describe_options(
   '%c %o <table>',
   [ 'manual|m', 'enter die rolls manually' ],
+  [ 'mode=s',   'table mode', { default => 'table' } ],
 );
 
 if ($opt->manual) {
@@ -228,7 +229,11 @@ END_STRING
   return $string;
 }
 
-my $result = main->roll_table_file($ARGV[0]);
-
-say "rolled on $ARGV[0]";
-say main->format_result($result);
+if ($opt->mode eq 'table') {
+  say "rolled on $ARGV[0]";
+  say main->resolve_table($ARGV[0]);
+} elsif ($opt->mode eq 'monster') {
+  say main->resolve_monster($ARGV[0]);
+} else {
+  die "unknown mode" unless $opt->mode eq 'table';
+}
