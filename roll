@@ -21,8 +21,13 @@ sub resolve_monster {
   my $num = $num_dice =~ /d/ ? $ROLLER->($num_dice, "number of $name")
                              : $num_dice;
 
-  my @hd = split /\s+/, $main->{Stats}{'Hit Dice'};
-  my $hd = do { local $" = ''; "$hd[0]d8@hd[ 1 .. $#hd]" };
+  my $HD = $main->{Stats}{'Hit Dice'};
+  my @hd = split /\s+/, $HD;
+  my $hd = do {
+    local $" = '';
+    my $d = $hd[0] !~ /d/ ? 'd8' : '';
+    "$hd[0]$d@hd[ 1 .. $#hd]"
+  };
   my @hp = map { $ROLLER->($hd, "$name \#$_ hp") } 1 .. $num;
 
   my %extra;
@@ -32,11 +37,15 @@ sub resolve_monster {
     $extra{ $desc } = $result->{text};
   }
 
+  my $ac = $main->{Stats}{'Armor Class'};
+  my $mv = $main->{Stats}{Movement};
+
 my $text = <<"END_MONSTER";
 
   $name
   No. Appearing: $num
-  Hit points: @hp
+  Hit points: ($HD HD) @hp
+  Stats: [ AC $ac, Mv $mv, Dmg $main->{Stats}{Damage} ]
 END_MONSTER
 
   for my $key (sort keys %extra) {
