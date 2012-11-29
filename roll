@@ -92,13 +92,19 @@ sub resolve_monster {
     my $desc = $extra->{description};
 
     if ($extra->{'per-unit'}) {
-      for my $unit (@units) {
+      UNIT: for my $unit (@units) {
         my $result = $self->roll_table($extra, "$name/$desc");
+        if ($result->{is_redirect}) {
+          $unit = $result->{text};
+          next UNIT;
+        }
+
         $unit->{ $desc } = $result->{text};
       }
     } else {
-        my $result = $self->roll_table($extra, "$name/$desc");
-        $extra{ $desc } = $result->{text};
+      my $result = $self->roll_table($extra, "$name/$desc");
+      return $result->{text} if $result->{is_redirect};
+      $extra{ $desc } = $result->{text};
     }
   }
 
@@ -124,11 +130,18 @@ END_MONSTER
   }
 
   for my $unit (@units) {
-    my $hp = delete $unit->{hp};
-    $text .= "- Hit points: $hp\n";
-    for my $key (sort keys %$unit) {
-      next unless defined $unit->{$key};
-      $text .= "  $key: $unit->{ $key }\n";
+    if (ref $unit) {
+      my $hp = delete $unit->{hp};
+      $text .= "- Hit points: $hp\n";
+      for my $key (sort keys %$unit) {
+        next unless defined $unit->{$key};
+        $text .= "  $key: $unit->{ $key }\n";
+      }
+    } else {
+      my $unit_text = $unit;
+      $unit_text =~ s/^/  /mg;
+      substr $unit_text, 0, 1, '-';
+      $text .= $unit_text;
     }
   }
 
@@ -164,21 +177,37 @@ sub roll_table {
   }
 
   my $payload = $case{ $result };
-  my ($type, $rest) = split /\s+/, $payload, 2;
 
-  my $method = $type eq 'M' ? 'resolve_monster'
-             : $type eq 'T' ? 'resolve_table'
-             : $type eq 'x' ? 'resolve_multi'
-             : $type eq '=' ? sub { $_[1] }
-             :                sub { $_[1] };
-
-  my $text = $self->$method($rest, $table, $name);
+  my ($method, $arg) = $self->_plan_for_string($payload);
+  my $is_redirect = $method eq 'resolve_goto';
+  my $text = $self->$method($arg, $table, $name);
 
   return {
     dice => $result,
     text => $text,
-    type => $type,
+    is_redirect => $is_redirect,
   };
+}
+
+sub _plan_for_string {
+  my ($self, $string) = @_;
+  my ($type, $rest) = split /\s+/, $string, 2;
+
+  my $method = $type eq 'M' ? 'resolve_monster'
+             : $type eq 'T' ? 'resolve_table'
+             : $type eq 'x' ? 'resolve_multi'
+             : $type eq 'G' ? 'resolve_goto'
+             : $type eq '=' ? sub { $_[1] }
+             :                sub { $_[1] };
+
+  return ($method, $rest);
+}
+
+sub resolve_goto {
+  my ($self, $string, $table, $name) = @_;
+
+  my ($method, $arg) = $self->_plan_for_string($string);
+  my $text = $self->$method($arg, $table, $name);
 }
 
 sub resolve_multi {
