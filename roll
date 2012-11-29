@@ -82,15 +82,24 @@ sub resolve_monster {
     my $d = $hd[0] !~ /d/ ? 'd8' : '';
     "$hd[0]$d@hd[ 1 .. $#hd]"
   };
-  my @hp = $num eq '?'
-         ? ()
-         : map { $ROLLER->($hd, "$name \#$_ hp") } 1 .. $num;
+
+  my @units = $num eq '?'
+            ? ()
+            : map {; { hp => $ROLLER->($hd, "$name \#$_ hp") } } 1 .. $num;
 
   my %extra;
   for my $extra (@$data) {
     my $desc = $extra->{description};
-    my $result = $self->roll_table($extra, "$name/$desc");
-    $extra{ $desc } = $result->{text};
+
+    if ($extra->{'per-unit'}) {
+      for my $unit (@units) {
+        my $result = $self->roll_table($extra, "$name/$desc");
+        $unit->{ $desc } = $result->{text};
+      }
+    } else {
+        my $result = $self->roll_table($extra, "$name/$desc");
+        $extra{ $desc } = $result->{text};
+    }
   }
 
   my $ac  = $main->{Stats}{'Armor Class'} // '?';
@@ -102,15 +111,25 @@ sub resolve_monster {
 
 my $text = <<"END_MONSTER";
 
-  $name
+$name
   No. Appearing: $num
-  Hit points: ($HD HD) @hp
+  Hit Dice: $HD
   Stats: [ AC $ac, Mv $mv, Dmg $dmg ]
   Total XP: $xp_t ($num x $xp xp)
 END_MONSTER
 
   for my $key (sort keys %extra) {
-    $text .= "  $key: $extra{ $key }\n";
+    next unless defined $extra{$key};
+    $text .= "  $key: $extra{$key}\n";
+  }
+
+  for my $unit (@units) {
+    my $hp = delete $unit->{hp};
+    $text .= "- Hit points: $hp\n";
+    for my $key (sort keys %$unit) {
+      next unless defined $unit->{$key};
+      $text .= "  $key: $unit->{ $key }\n";
+    }
   }
 
   return $text
