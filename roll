@@ -55,12 +55,15 @@ END_MONSTER
   return $text
 }
 
-sub resolve_table { goto &roll_table_file }
+sub resolve_table {
+  my ($self, $table) = @_;
+  $self->format_result( $self->roll_table_file($table) );
+}
 
 sub roll_table_file {
   my ($self, $fn) = @_;
   my $data = YAML::Tiny->read($fn);
-  die $YAML::Tiny::errstr unless $data;
+  die "error in $fn: $YAML::Tiny::errstr" unless $data;
   $self->roll_table( $data->[0], $fn );
 }
 
@@ -104,7 +107,7 @@ sub resolve_multi {
   # something -- rjbs, 2012-11-27
 
   my @results = map { $self->roll_table($table, $name) } (1 .. $x);
-  return join "\n", map {; $_->{text} } @results;
+  return join "", map {; "\n" . $self->format_result($_, 1) } @results;
 }
 
 my ($opt, $usage) = describe_options(
@@ -133,8 +136,19 @@ if ($opt->manual) {
   };
 }
 
+sub format_result {
+  my ($self, $result, $indent) = @_;
+  my $string = <<"END_STRING";
+rolled: $result->{dice}
+result: ($result->{type}) $result->{text}
+END_STRING
+
+  $string =~ s{^}
+              {'  ' x ($indent // 0)}egm;
+  return $string;
+}
+
 my $result = main->roll_table_file($ARGV[0]);
 
 say "rolled on $ARGV[0]";
-say "rolled: $result->{dice}";
-say "result: ($result->{type}) $result->{text}";
+say main->format_result($result);
