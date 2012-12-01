@@ -5,6 +5,8 @@ use 5.12.0;
 
 use Games::Dice;
 use List::AllUtils qw(sum);
+use Params::Util qw(_ARRAY _HASH);
+use Roland::Result::Error;
 use Roland::Result::Monster;
 use Roland::Result::Multi;
 use Roland::Result::Simple;
@@ -20,25 +22,71 @@ sub roll_table_file {
   my ($self, $fn) = @_;
 
   unless (-e $fn) {
-    return Roland::Result::Simple->new({
-      text => "(missing file, $fn)"
+    return Roland::Result::Error->new({
+      resource => $fn,
+      error    => "file not found"
     });
   }
 
   my $data = YAML::Tiny->read($fn);
-  die "error in $fn: $YAML::Tiny::errstr" unless $data;
+
+  unless ($data) {
+    return Roland::Result::Error->new({
+      resource => $fn,
+      error    => $YAML::Tiny::errstr,
+    });
+  }
+
   $self->roll_table( $data, $fn );
 }
 
-sub roll_table {
-  my ($self, $data, $name) = @_;
-  my $table = $data->[0];
+sub _header_and_rest {
+  my ($self, $data) = @_;
 
-  if ($table->{type} // 'list' eq 'monster') {
-    return Roland::Result::Monster->from_data($data, $self);
+  if (! ref $data->[0]) {
+    return (
+      { type => $data->[0] },
+      [ @$data[ 1 .. $#$data ] ],
+    )
   }
 
-  die "multiple documents in standard table" if @$data > 1;
+  if (_HASH($data->[0]) and exists $data->[0]{type}) {
+    return ($data->[0] => @$data[ 1 .. $#$data ]);
+  }
+
+  return ({ type => 'table' } => $data) if _HASH($data->[0]);
+  return ({ type => 'group' } => $data) if _ARRAY($data->[0]);
+
+  Carp::croak("no idea what to do with table input: $data->[0]");
+}
+
+sub roll_table {
+  my ($self, $input, $name) = @_;
+
+  my ($header, $tables) = $self->_header_and_rest($input);
+
+  if ($header->{type} eq 'monster') {
+    return Roland::Result::Monster->from_data($tables, $self);
+  }
+
+  if ($header->{type} eq 'group') {
+    die "multiple documents in group table" if @$tables > 1;
+    my @list = @{ $tables->[0] };
+
+    my @group;
+    for my $i (0 .. $#list) {
+      push @group, $self->_result_for_line(
+        $list[$i],
+        $input,
+        "$name:$i",
+      );
+    }
+
+    return Roland::Result::Multi->new({ results => \@group });
+  }
+
+  die "multiple documents in standard table" if @$tables > 1;
+  my $table = $tables->[0];
 
   $name //= "?";
   my @dice_str = split / \+ /, $table->{dice};
@@ -62,6 +110,15 @@ sub roll_table {
   return Roland::Result::Simple->new({ text => "(no result)" })
     unless defined $payload;
 
+  my $result = $self->_result_for_line($payload, $input, $name);
+
+  # must return a Result object
+  return $result;
+}
+
+sub _result_for_line {
+  my ($self, $payload, $data, $name) = @_;
+
   my ($type, $rest) = split /\s+/, $payload, 2;
 
   my $method = $type eq 'T' ? 'resolve_table'
@@ -71,30 +128,10 @@ sub roll_table {
              :                sub { $_[1] };
 
   my $result = $self->$method($rest, $data, $name);
-
-  # must return a Result object
-  return $result;
 }
 
 sub _resolve_simple {
   Roland::Result::Simple->new({ text => $_[1] })
-}
-
-sub _resolve_monster {
-  my ($self, $path) = @_;
-
-  my $fn = "monster/$path";
-  unless (-e $fn) {
-    return Roland::Result::Simple->new({
-      text => "(missing file, $fn)"
-    });
-  }
-
-  my $data = YAML::Tiny->read($fn);
-  die "error in $fn: $YAML::Tiny::errstr" unless $data;
-  $data->[0]->{type} = 'monster';
-  $self->roll_table( $data, $fn );
-  # Roland::Result::Monster->from_file($path, $self);
 }
 
 #sub resolve_goto {
