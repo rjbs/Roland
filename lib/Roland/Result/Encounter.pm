@@ -28,19 +28,11 @@ has extras => (
   },
 );
 
-sub from_file {
-  my ($class, $path, $hub) = @_;
+sub from_data {
+  my ($class, $data, $hub) = @_;
 
-  unless (-e "monsters/$path") { # XXX
-    return Roland::Result::Simple->new({
-      text => "(missing file, monsters/$path)"
-    });
-  }
-
-  my $data = YAML::Tiny->read("monsters/$path");
-  die $YAML::Tiny::errstr unless $data;
   my $main = shift @$data;
-  my $name = $main->{Name} // $path;
+  my $name = $main->{Name} // "(unknown)";
   my $num_dice = $main->{Stats}{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/ ? $hub->roll_dice($num_dice, "number of $name")

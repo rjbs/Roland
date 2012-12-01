@@ -27,11 +27,19 @@ sub roll_table_file {
 
   my $data = YAML::Tiny->read($fn);
   die "error in $fn: $YAML::Tiny::errstr" unless $data;
-  $self->roll_table( $data->[0], $fn );
+  $self->roll_table( $data, $fn );
 }
 
 sub roll_table {
-  my ($self, $table, $name) = @_;
+  my ($self, $data, $name) = @_;
+  my $table = $data->[0];
+
+  if ($table->{type} eq 'encounter') {
+    return Roland::Result::Encounter->from_data($data, $self);
+  }
+
+  die "multiple documents in standard table" if @$data > 1;
+
   $name //= "?";
   my @dice_str = split / \+ /, $table->{dice};
 
@@ -60,11 +68,8 @@ sub roll_table {
              : $type eq 'T' ? 'resolve_table'
              : $type eq 'x' ? 'resolve_multi'
              # : $type eq 'G' ? 'resolve_goto'
-             : $type eq '=' ? sub {
-                                Roland::Result::Simple->new({ text => $_[1] })
-                              }
+             : $type eq '=' ? '_resolve_simple'
              :                sub { $_[1] };
-
 
   my $result = $self->$method($rest, $table, $name);
 
@@ -72,9 +77,25 @@ sub roll_table {
   return $result;
 }
 
+sub _resolve_simple {
+  Roland::Result::Simple->new({ text => $_[1] })
+}
+
 sub _resolve_monster {
   my ($self, $path) = @_;
-  Roland::Result::Encounter->from_file($path, $self);
+
+  my $fn = "monsters/$path";
+  unless (-e $fn) {
+    return Roland::Result::Simple->new({
+      text => "(missing file, $fn)"
+    });
+  }
+
+  my $data = YAML::Tiny->read($fn);
+  die "error in $fn: $YAML::Tiny::errstr" unless $data;
+  $data->[0]->{type} = 'encounter';
+  $self->roll_table( $data, $fn );
+  # Roland::Result::Encounter->from_file($path, $self);
 }
 
 #sub resolve_goto {
