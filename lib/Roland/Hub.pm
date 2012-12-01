@@ -94,24 +94,32 @@ sub roll_table {
   $name //= "?";
   my @dice_str = split / \+ /, $table->{dice};
 
-  my $total = sum 0, map { $self->roll_dice($_, $name) } @dice_str;
+  my @results;
+  for my $i (
+    1 .. $self->roll_dice($table->{times} // 1, "times to roll on $name")
+  ) {
+    my $total = sum 0, map { $self->roll_dice($_, $name) } @dice_str;
 
-  my %case;
-  for my $key (keys %{ $table->{results} }) {
-    if ($key =~ /-/) {
-      my ($min, $max) = split /-/, $key;
-      $case{ $_ } = $table->{results}{$key} for $min .. $max;
-    } else {
-      $case{ $key } = $table->{results}{$key};
+    my %case;
+    for my $key (keys %{ $table->{results} }) {
+      if ($key =~ /-/) {
+        my ($min, $max) = split /-/, $key;
+        $case{ $_ } = $table->{results}{$key} for $min .. $max;
+      } else {
+        $case{ $key } = $table->{results}{$key};
+      }
     }
+
+    my $payload = $case{ $total };
+
+    my $result = $self->_result_for_line($payload, $input, $name);
+    push @results, $result unless $result->isa('Roland::Result::None');
   }
 
-  my $payload = $case{ $total };
-
-  my $result = $self->_result_for_line($payload, $input, $name);
-
   # must return a Result object
-  return $result;
+  return Roland::Result::None->new unless @results;
+  return $results[0] if @results == 1;
+  return Roland::Result::Multi->new({ results => \@results });
 }
 
 sub _result_for_line {
@@ -156,10 +164,13 @@ sub _resolve_simple {
 
 sub resolve_multi {
   my ($self, $x, $table, $name) = @_;
+
   # XXX: no, this should get a list of [ $table, $name ] tuples to combine or
   # something -- rjbs, 2012-11-27
 
-  my @results = map { $self->roll_table($table, $name) } (1 .. $x);
+  my $num = $self->roll_dice($x, "times to roll on $name");
+
+  my @results = map { $self->roll_table($table, $name) } (1 .. $num);
   return Roland::Result::Multi->new({ results => \@results });
 }
 
@@ -177,6 +188,8 @@ has manual => (
 
 sub roll_dice {
   my ($self, $dice, $label) = @_;
+
+  return $dice if $dice !~ /d/;
 
   my $result;
 
