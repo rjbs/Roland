@@ -5,6 +5,7 @@ with 'Roland::Result';
 use namespace::autoclean;
 
 use Data::Bucketeer;
+use Text::Autoformat;
 use YAML::Tiny;
 
 has name  => (is => 'ro');
@@ -119,7 +120,12 @@ END_MONSTER
 
   for my $key ($self->_extra_keys) {
     next unless defined(my $v = $self->_get_extra($key));
-    $text .= "  $key: $v\n";
+    if ($indent * 2  +  length($v)  +  length($key)  +  4  >  79) {
+      $v = autoformat $v, { left => 4, right => 79, all => 1 };
+      $text .= "  $key:\n$v";
+    } else {
+      $text .= "  $key: $v\n";
+    }
   }
 
   for my $unit ($self->units) {
