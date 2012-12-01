@@ -71,6 +71,11 @@ sub roll_table {
   }
 
   if ($header->{type} eq 'group') {
+    # XXX: Make it possible to have a "how many" that's like the "times"
+    # option for "table" tables.  Given a long list, it would choose $x items
+    # from the list, possibly never picking the same once twice.  That will
+    # require being able to specify a "group" table as a mapping, rather than
+    # only the then-sugar form of a sequence. -- rjbs, 2012-11-30
     die "multiple documents in group table" if @$tables > 1;
     my @list = @{ $tables->[0] };
 
