@@ -1,5 +1,8 @@
 package Roland::Result::Multi;
 use Moose;
+with 'Roland::Result';
+
+use namespace::autoclean;
 
 has results => (
   isa => 'ArrayRef',

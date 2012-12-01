@@ -1,5 +1,8 @@
 package Roland::Result::Monster;
 use Moose;
+with 'Roland::Result';
+
+use namespace::autoclean;
 
 use Data::Bucketeer;
 use YAML::Tiny;
@@ -190,6 +193,5 @@ sub xp_for_monster {
   my $pair = $XP_LOOKUP->result_for($d8);
   return($pair->[0] + $pair->[1] * $bonuses);
 }
-
 
 1;

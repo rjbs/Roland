@@ -1,5 +1,8 @@
 package Roland::Result::Simple;
 use Moose;
+with 'Roland::Result';
+
+use namespace::autoclean;
 
 has text => (is => 'ro');
 
