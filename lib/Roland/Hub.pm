@@ -84,7 +84,7 @@ sub _resolve_simple {
 sub _resolve_monster {
   my ($self, $path) = @_;
 
-  my $fn = "monsters/$path";
+  my $fn = "monster/$path";
   unless (-e $fn) {
     return Roland::Result::Simple->new({
       text => "(missing file, $fn)"
