@@ -14,7 +14,14 @@ has results => (
 sub as_text {
   my ($self, $indent) = @_;
 
-  return join qq{\n}, map {; $_->as_text($indent) } $self->results;
+  my @hunks;
+  for my $result ($self->results) {
+    push @hunks, $result->as_text(
+      $result->isa('Roland::Result::Multi') ? $indent+1 : $indent
+    );
+  }
+
+  return join qq{\n}, @hunks;
 }
 
 1;
