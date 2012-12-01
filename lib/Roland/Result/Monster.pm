@@ -97,6 +97,7 @@ sub from_data {
 
 sub as_text {
   my ($self, $indent) = @_;
+  $indent //= 0;
 
   my $name = $self->name;
   my $hd   = $self->hit_dice;
