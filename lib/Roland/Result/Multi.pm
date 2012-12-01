@@ -13,6 +13,7 @@ has results => (
 
 sub as_text {
   my ($self, $indent) = @_;
+  $indent //= 0;
 
   my @hunks;
   for my $result ($self->results) {
