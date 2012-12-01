@@ -76,11 +76,13 @@ sub roll_table {
 
     my @group;
     for my $i (0 .. $#list) {
-      push @group, $self->_result_for_line(
+      my $result = $self->_result_for_line(
         $list[$i],
         $input,
         "$name:$i",
       );
+
+      push @group, $result unless $result->isa('Roland::Result::None');
     }
 
     return Roland::Result::Multi->new({ results => \@group });
