@@ -13,7 +13,10 @@ my ($opt, $usage) = describe_options(
   [ 'debug|d',  'show all die rolling activity' ],
 );
 
-my $hub = Roland::Hub->new({ manual => $opt->manual });
+my $hub = Roland::Hub->new({
+  manual => $opt->manual,
+  debug  => $opt->debug,
+});
 
 say "rolling on $ARGV[0]" if $hub->debug;
 say $hub->resolve_table($ARGV[0])->as_text;
