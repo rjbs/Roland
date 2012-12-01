@@ -95,7 +95,7 @@ sub from_data {
 }
 
 sub as_text {
-  my ($self) = @_;
+  my ($self, $indent) = @_;
 
   my $name = $self->name;
   my $hd   = $self->hit_dice;
@@ -137,6 +137,9 @@ END_MONSTER
       $text .= $unit_text;
     }
   }
+
+  $text =~ s{^}
+            {'  ' x ($indent // 0)}egm;
 
   return $text;
 }
