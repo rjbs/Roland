@@ -35,6 +35,7 @@ has extras => (
 sub from_data {
   my ($class, $data, $hub) = @_;
 
+  # TODO: barf about extra table entries?
   my $main = shift @$data;
   my $name = $main->{Name} // "(unknown)";
   my $num_dice = $main->{Stats}{'No. Appearing'} // '?';
@@ -55,23 +56,22 @@ sub from_data {
     : map {; { hp => $hub->roll_dice($hd, "$name \#$_ hp") } } 1 .. $num;
 
   my %extra;
-  for my $extra (@$data) {
+  for my $extra (@{ $main->{extras} || [] }) {
     my $desc = $extra->{description};
 
-    if ($extra->{'per-unit'}) {
-      UNIT: for my $unit (@units) {
-        my $result = $hub->roll_table([$extra], "$name/$desc");
-        if ($result->{is_redirect}) {
-          $unit = $result->{text};
-          next UNIT;
-        }
+    my $result = $hub->roll_table([$extra], "$name/$desc");
+    # TODO reinstate encounter redirects
+    $extra{ $desc } = $result;
+  }
 
-        $unit->{ $desc } = $result->{text};
-      }
-    } else {
-      my $result = $hub->roll_table([$extra], "$name/$desc");
-      return $result->{text} if $result->{is_redirect};
-      $extra{ $desc } = $result->{text};
+  for my $unit_extra (@{ $main->{'per-unit'} || [] }) {
+    my $desc = $unit_extra->{description};
+
+    UNIT: for my $unit (@units) {
+      my $result = $hub->roll_table([$unit_extra], "$name/$desc");
+      # TODO reinstate unit redirects
+
+      $unit->{ $desc } = $result;
     }
   }
 
@@ -121,6 +121,7 @@ END_MONSTER
 
   for my $key ($self->_extra_keys) {
     next unless defined(my $v = $self->_get_extra($key));
+    $v = $v->as_text;
     if ($indent * 2  +  length($v)  +  length($key)  +  4  >  79) {
       $v = autoformat $v, { left => 4, right => 79, all => 1 };
       $text .= "  $key:\n$v";
@@ -135,7 +136,7 @@ END_MONSTER
       $text .= "- Hit points: $hp\n";
       for my $key (sort keys %$unit) {
         next unless defined $unit->{$key};
-        $text .= "  $key: $unit->{ $key }\n";
+        $text .= "  $key: " . $unit->{$key}->as_text . "\n";
       }
     } else {
       my $unit_text = $unit;
