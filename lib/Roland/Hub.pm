@@ -9,6 +9,7 @@ use Params::Util qw(_ARRAY _HASH);
 use Roland::Result::Error;
 use Roland::Result::Monster;
 use Roland::Result::Multi;
+use Roland::Result::None;
 use Roland::Result::Simple;
 use YAML::Tiny;
 
@@ -105,11 +106,6 @@ sub roll_table {
 
   my $payload = $case{ $total };
 
-  # XXX: Is this really how you want to handle an undef entry?
-  # -- rjbs, 2012-11-30
-  return Roland::Result::Simple->new({ text => "(no result)" })
-    unless defined $payload;
-
   my $result = $self->_result_for_line($payload, $input, $name);
 
   # must return a Result object
@@ -118,6 +114,8 @@ sub roll_table {
 
 sub _result_for_line {
   my ($self, $payload, $data, $name) = @_;
+
+  return Roland::Result::None->new unless defined $payload;
 
   my ($type, $rest) = split /\s+/, $payload, 2;
 
