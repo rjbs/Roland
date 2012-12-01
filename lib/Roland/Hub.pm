@@ -163,6 +163,12 @@ sub resolve_multi {
   return Roland::Result::Multi->new({ results => \@results });
 }
 
+has debug => (
+  is  => 'ro',
+  isa => 'Bool',
+  default => 0,
+);
+
 has manual => (
   is  => 'ro',
   isa => 'Bool',
@@ -185,7 +191,7 @@ sub roll_dice {
     return $result;
   } else {
     my $result = Games::Dice::roll($dice);
-    print "rolled $dice for $label: $result\n";
+    say "rolled $dice for $label: $result" if $self->debug;
     return $result;
   }
 

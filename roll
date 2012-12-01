@@ -10,9 +10,10 @@ use Roland::Hub;
 my ($opt, $usage) = describe_options(
   '%c %o <table>',
   [ 'manual|m', 'enter die rolls manually' ],
+  [ 'debug|d',  'show all die rolling activity' ],
 );
 
 my $hub = Roland::Hub->new({ manual => $opt->manual });
 
-say "rolling on on $ARGV[0]";
+say "rolling on $ARGV[0]" if $hub->debug;
 say $hub->resolve_table($ARGV[0])->as_text;
