@@ -1,4 +1,4 @@
-package Roland::Result::Encounter;
+package Roland::Result::Monster;
 use Moose;
 
 use Data::Bucketeer;
@@ -56,7 +56,7 @@ sub from_data {
 
     if ($extra->{'per-unit'}) {
       UNIT: for my $unit (@units) {
-        my $result = $hub->roll_table($extra, "$name/$desc");
+        my $result = $hub->roll_table([$extra], "$name/$desc");
         if ($result->{is_redirect}) {
           $unit = $result->{text};
           next UNIT;
@@ -65,7 +65,7 @@ sub from_data {
         $unit->{ $desc } = $result->{text};
       }
     } else {
-      my $result = $hub->roll_table($extra, "$name/$desc");
+      my $result = $hub->roll_table([$extra], "$name/$desc");
       return $result->{text} if $result->{is_redirect};
       $extra{ $desc } = $result->{text};
     }

@@ -5,7 +5,7 @@ use 5.12.0;
 
 use Games::Dice;
 use List::AllUtils qw(sum);
-use Roland::Result::Encounter;
+use Roland::Result::Monster;
 use Roland::Result::Multi;
 use Roland::Result::Simple;
 use YAML::Tiny;
@@ -34,8 +34,8 @@ sub roll_table {
   my ($self, $data, $name) = @_;
   my $table = $data->[0];
 
-  if ($table->{type} eq 'encounter') {
-    return Roland::Result::Encounter->from_data($data, $self);
+  if ($table->{type} // 'list' eq 'monster') {
+    return Roland::Result::Monster->from_data($data, $self);
   }
 
   die "multiple documents in standard table" if @$data > 1;
@@ -64,14 +64,13 @@ sub roll_table {
 
   my ($type, $rest) = split /\s+/, $payload, 2;
 
-  my $method = $type eq 'M' ? '_resolve_monster'
-             : $type eq 'T' ? 'resolve_table'
+  my $method = $type eq 'T' ? 'resolve_table'
              : $type eq 'x' ? 'resolve_multi'
              # : $type eq 'G' ? 'resolve_goto'
              : $type eq '=' ? '_resolve_simple'
              :                sub { $_[1] };
 
-  my $result = $self->$method($rest, $table, $name);
+  my $result = $self->$method($rest, $data, $name);
 
   # must return a Result object
   return $result;
@@ -93,9 +92,9 @@ sub _resolve_monster {
 
   my $data = YAML::Tiny->read($fn);
   die "error in $fn: $YAML::Tiny::errstr" unless $data;
-  $data->[0]->{type} = 'encounter';
+  $data->[0]->{type} = 'monster';
   $self->roll_table( $data, $fn );
-  # Roland::Result::Encounter->from_file($path, $self);
+  # Roland::Result::Monster->from_file($path, $self);
 }
 
 #sub resolve_goto {
