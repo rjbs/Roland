@@ -125,7 +125,14 @@ sub _result_for_line {
              : $type eq 'x' ? 'resolve_multi'
              # : $type eq 'G' ? 'resolve_goto'
              : $type eq '=' ? '_resolve_simple'
-             :                sub { $_[1] };
+             :                undef;
+
+  unless ($method) {
+    return Roland::Result::Error->new({
+      resource => "instruction <$payload>",
+      error    => "don't know how to dispatch",
+    });
+  }
 
   my $result = $self->$method($rest, $data, $name);
 }
