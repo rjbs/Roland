@@ -38,12 +38,12 @@ sub from_data {
   # TODO: barf about extra table entries?
   my $main = shift @$data;
   my $name = $main->{Name} // "(unknown)";
-  my $num_dice = $main->{Stats}{'No. Appearing'} // '?';
+  my $num_dice = $main->{stats}{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/ ? $hub->roll_dice($num_dice, "number of $name")
                              : $num_dice;
 
-  my $HD = $main->{Stats}{'Hit Dice'} // '?';
+  my $HD = $main->{stats}{'Hit Dice'} // '?';
   my @hd = split /\s+/, $HD;
   my $hd = do {
     local $" = '';
@@ -75,9 +75,9 @@ sub from_data {
     }
   }
 
-  my $ac  = $main->{Stats}{'Armor Class'} // '?';
-  my $mv  = $main->{Stats}{Movement}      // '?';
-  my $dmg = $main->{Stats}{Damage}        // '?';
+  my $ac  = $main->{stats}{'Armor Class'} // '?';
+  my $mv  = $main->{stats}{Movement}      // '?';
+  my $dmg = $main->{stats}{Damage}        // '?';
 
   my $xp   = $class->xp_for_monster($main) || '?';
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
@@ -186,7 +186,7 @@ sub xp_for_monster {
   my ($self, $monster) = @_;
   my $bonuses = @{ $monster->{'XP Bonuses'} // [] };
 
-  return 0 unless my $hd = $monster->{Stats}{'Hit Dice'};
+  return 0 unless my $hd = $monster->{stats}{'Hit Dice'};
   my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
   $bonus = ($sign || $bonus) ? "$sign$bonus" : 0;
 
