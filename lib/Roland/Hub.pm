@@ -119,6 +119,12 @@ sub _result_for_line {
 
   return Roland::Result::None->new unless defined $payload;
 
+  if (ref $payload) {
+    # Almost certainly this blind "wrap it in a []" needs to be revised later,
+    # but for now it should work just fine. -- rjbs, 2012-11-30
+    return $self->roll_table([$payload], "$name/sub");
+  }
+
   my ($type, $rest) = split /\s+/, $payload, 2;
 
   my $method = $type eq 'T' ? 'resolve_table'
