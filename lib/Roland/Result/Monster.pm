@@ -57,7 +57,7 @@ sub from_data {
 
   my %extra;
   for my $extra (@{ $main->{extras} || [] }) {
-    my $desc = $extra->{description};
+    my $desc = $extra->{label};
 
     my $result = $hub->roll_table([$extra], "$name/$desc");
     # TODO reinstate encounter redirects
@@ -65,7 +65,7 @@ sub from_data {
   }
 
   for my $unit_extra (@{ $main->{'per-unit'} || [] }) {
-    my $desc = $unit_extra->{description};
+    my $desc = $unit_extra->{label};
 
     UNIT: for my $unit (@units) {
       my $result = $hub->roll_table([$unit_extra], "$name/$desc");
