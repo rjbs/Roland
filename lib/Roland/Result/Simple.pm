@@ -11,7 +11,7 @@ sub as_text {
 
   my $text = $self->text;
 
-  my $string = "$text\n";
+  my $string = "$text";
 
   $string =~ s{^}
               {'  ' x ($indent // 0)}egm;
