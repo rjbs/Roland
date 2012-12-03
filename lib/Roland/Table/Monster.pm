@@ -1,5 +1,6 @@
 package Roland::Table::Monster;
 use Moose;
+with 'Roland::Table';
 
 use Data::Bucketeer;
 use Roland::Result::Monster;
@@ -8,12 +9,6 @@ use namespace::autoclean;
 
 has _guts => (
   is => 'ro',
-);
-
-has hub => (
-  is  => 'ro',
-  isa => 'Object',
-  required => 1,
 );
 
 sub from_data {
