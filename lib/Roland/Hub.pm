@@ -12,6 +12,7 @@ use Roland::Result::None;
 use Roland::Result::Simple;
 use Roland::Table::Group;
 use Roland::Table::Monster;
+use Roland::Table::Standard;
 use YAML::Tiny;
 
 sub resolve_table {
@@ -75,38 +76,11 @@ sub roll_table {
     return Roland::Table::Group->from_data($tables, $self)->roll_table;
   }
 
-  die "multiple documents in standard table" if @$tables > 1;
-  my $table = $tables->[0];
-
-  $name //= "?";
-  my @dice_str = split / \+ /, $table->{dice};
-
-  my @results;
-  for my $i (
-    1 .. $self->roll_dice($table->{times} // 1, "times to roll on $name")
-  ) {
-    my $total = sum 0, map { $self->roll_dice($_, $name) } @dice_str;
-
-    my %case;
-    for my $key (keys %{ $table->{results} }) {
-      if ($key =~ /-/) {
-        my ($min, $max) = split /-/, $key;
-        $case{ $_ } = $table->{results}{$key} for $min .. $max;
-      } else {
-        $case{ $key } = $table->{results}{$key};
-      }
-    }
-
-    my $payload = $case{ $total };
-
-    my $result = $self->_result_for_line($payload, $input, $name);
-    push @results, $result unless $result->isa('Roland::Result::None');
+  if ($header->{type} eq 'table') {
+    return Roland::Table::Standard->from_data($tables, $self)->roll_table;
   }
 
-  # must return a Result object
-  return Roland::Result::None->new unless @results;
-  return $results[0] if @results == 1;
-  return Roland::Result::Multi->new({ results => \@results });
+  die "wtf";
 }
 
 sub _result_for_line {

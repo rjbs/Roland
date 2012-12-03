@@ -10,4 +10,6 @@ has hub => (
   weak_ref => 1,
 );
 
+requires 'roll_table';
+
 1;
