@@ -12,10 +12,7 @@ has _guts => (
 );
 
 sub from_data {
-  my ($class, $tables, $hub) = @_;
-
-  die "multiple documents in standard table" if @$tables > 1;
-  my $table = $tables->[0];
+  my ($class, $table, $hub) = @_;
 
   return $class->new({
     _guts => $table,
@@ -47,7 +44,7 @@ sub roll_table {
 
     my $payload = $case{ $total };
 
-    my $result = $self->hub->_result_for_line($payload, [$table], $name);
+    my $result = $self->hub->_result_for_line($payload, $self, $name);
     push @results, $result unless $result->isa('Roland::Result::None');
   }
 

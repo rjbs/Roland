@@ -53,12 +53,10 @@ sub _header_and_rest {
     )
   }
 
-  if (_HASH($data->[0]) and exists $data->[0]{type}) {
-    return ($data->[0] => @$data[ 1 .. $#$data ]);
-  }
+  die "ill-formed document" if @$data > 1;
 
-  return ({ type => 'table' } => $data) if _HASH($data->[0]);
-  return ({ type => 'group' } => $data) if _ARRAY($data->[0]);
+  return ({ type => 'table' } => $data->[0]) if _HASH($data->[0]);
+  return ({ type => 'group' } => { items => $data->[0] }) if _ARRAY($data->[0]);
 
   Carp::croak("no idea what to do with table input: $data->[0]");
 }

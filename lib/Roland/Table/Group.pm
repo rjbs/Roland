@@ -19,7 +19,7 @@ sub from_data {
   # require being able to specify a "group" table as a mapping, rather than
   # only the then-sugar form of a sequence. -- rjbs, 2012-11-30
   return $class->new({
-    _guts => $data->[0],
+    _guts => $data,
     hub   => $hub,
   });
 }
@@ -27,13 +27,13 @@ sub from_data {
 sub roll_table {
   my ($self) = @_;
 
-  my @list = @{ $self->_guts };
+  my @list = @{ $self->_guts->{items} };
 
   my @group;
   for my $i (0 .. $#list) {
     my $result = $self->hub->_result_for_line(
       $list[$i],
-      [\@list],
+      $self,
       "name:$i", # should be our name
     );
 
