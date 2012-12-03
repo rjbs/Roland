@@ -63,21 +63,20 @@ sub _header_and_rest {
   Carp::croak("no idea what to do with table input: $data->[0]");
 }
 
+# Make this a registry -- rjbs, 2012-12-03
+my %CLASS_FOR_TYPE = (
+  monster => 'Roland::Table::Monster',
+  group   => 'Roland::Table::Group',
+  table   => 'Roland::Table::Standard',
+);
+
 sub roll_table {
   my ($self, $input, $name) = @_;
 
   my ($header, $tables) = $self->_header_and_rest($input);
 
-  if ($header->{type} eq 'monster') {
-    return Roland::Table::Monster->from_data($tables, $self)->roll_table;
-  }
-
-  if ($header->{type} eq 'group') {
-    return Roland::Table::Group->from_data($tables, $self)->roll_table;
-  }
-
-  if ($header->{type} eq 'table') {
-    return Roland::Table::Standard->from_data($tables, $self)->roll_table;
+  if (my $class = $CLASS_FOR_TYPE{ $header->{type} }) {
+    return $class->from_data($tables, $self)->roll_table;
   }
 
   die "wtf";
