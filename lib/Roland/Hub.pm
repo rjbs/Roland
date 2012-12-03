@@ -10,6 +10,7 @@ use Roland::Result::Error;
 use Roland::Result::Multi;
 use Roland::Result::None;
 use Roland::Result::Simple;
+use Roland::Table::Group;
 use Roland::Table::Monster;
 use YAML::Tiny;
 
@@ -71,26 +72,7 @@ sub roll_table {
   }
 
   if ($header->{type} eq 'group') {
-    # XXX: Make it possible to have a "how many" that's like the "times"
-    # option for "table" tables.  Given a long list, it would choose $x items
-    # from the list, possibly never picking the same once twice.  That will
-    # require being able to specify a "group" table as a mapping, rather than
-    # only the then-sugar form of a sequence. -- rjbs, 2012-11-30
-    die "multiple documents in group table" if @$tables > 1;
-    my @list = @{ $tables->[0] };
-
-    my @group;
-    for my $i (0 .. $#list) {
-      my $result = $self->_result_for_line(
-        $list[$i],
-        $input,
-        "$name:$i",
-      );
-
-      push @group, $result unless $result->isa('Roland::Result::None');
-    }
-
-    return Roland::Result::Multi->new({ results => \@group });
+    return Roland::Table::Group->from_data($tables, $self)->roll_table;
   }
 
   die "multiple documents in standard table" if @$tables > 1;
