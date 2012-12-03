@@ -7,10 +7,10 @@ use Games::Dice;
 use List::AllUtils qw(sum);
 use Params::Util qw(_ARRAY _HASH);
 use Roland::Result::Error;
-use Roland::Result::Monster;
 use Roland::Result::Multi;
 use Roland::Result::None;
 use Roland::Result::Simple;
+use Roland::Table::Monster;
 use YAML::Tiny;
 
 sub resolve_table {
@@ -67,7 +67,7 @@ sub roll_table {
   my ($header, $tables) = $self->_header_and_rest($input);
 
   if ($header->{type} eq 'monster') {
-    return Roland::Result::Monster->from_data($tables, $self);
+    return Roland::Table::Monster->from_data($tables, $self)->roll_table;
   }
 
   if ($header->{type} eq 'group') {
