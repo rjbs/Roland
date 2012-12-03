@@ -12,6 +12,7 @@ use Roland::Result::None;
 use Roland::Result::Simple;
 use Roland::Roller::Manual;
 use Roland::Roller::Random;
+use Roland::Table::Dictionary;
 use Roland::Table::Group;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
@@ -49,9 +50,11 @@ sub _header_and_rest {
   my ($self, $data) = @_;
 
   if (! ref $data->[0]) {
+    die "ill-formed document" if @$data > 2;
+
     return (
       { type => $data->[0] },
-      [ @$data[ 1 .. $#$data ] ],
+      $data->[1],
     )
   }
 
@@ -68,6 +71,7 @@ my %CLASS_FOR_TYPE = (
   monster => 'Roland::Table::Monster',
   group   => 'Roland::Table::Group',
   table   => 'Roland::Table::Standard',
+  dict    => 'Roland::Table::Dictionary',
 );
 
 sub roll_table {

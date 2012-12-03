@@ -18,7 +18,7 @@ sub as_text {
   my $text = '';
 
   for my $slot ($self->_results) {
-    $text .= sprintf '%s: %s', $slot->[0], $slot->[1]->as_text($indent+1);
+    $text .= sprintf "%s: %s\n", $slot->[0], $slot->[1]->as_text($indent+1);
   }
 
   return $text;
