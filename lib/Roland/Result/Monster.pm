@@ -44,7 +44,7 @@ sub as_text {
   my @units  = $self->units;
   my $num    = @units;
   my $xp_per = $self->xp_per_unit;
-  my $xp_tot = $xp_per * $num;
+  my $xp_tot = $xp_per eq '?' ? '?' : $xp_per * $num;
 
 my $text = <<"END_MONSTER";
 
