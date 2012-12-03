@@ -147,6 +147,7 @@ has manual => (
   default => 0,
 );
 
+# TODO delegate this to a Roller
 sub roll_dice {
   my ($self, $dice, $label) = @_;
 
