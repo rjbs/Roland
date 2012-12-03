@@ -10,6 +10,8 @@ use Roland::Result::Error;
 use Roland::Result::Multi;
 use Roland::Result::None;
 use Roland::Result::Simple;
+use Roland::Roller::Manual;
+use Roland::Roller::Random;
 use Roland::Table::Group;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
@@ -81,7 +83,7 @@ sub roll_table {
 }
 
 sub _result_for_line {
-  my ($self, $payload, $data, $name) = @_;
+  my ($self, $payload, $table, $name) = @_;
 
   return Roland::Result::None->new unless defined $payload;
 
@@ -106,7 +108,7 @@ sub _result_for_line {
     });
   }
 
-  my $result = $self->$method($rest, $data, $name);
+  my $result = $self->$method($rest, $table, $name);
 }
 
 sub _resolve_simple {
@@ -128,7 +130,7 @@ sub resolve_multi {
 
   my $num = $self->roll_dice($x, "times to roll on $name");
 
-  my @results = map { $self->roll_table($table, $name) } (1 .. $num);
+  my @results = map { $table->roll_table } (1 .. $num);
   return Roland::Result::Multi->new({ results => \@results });
 }
 
@@ -144,30 +146,15 @@ has manual => (
   default => 0,
 );
 
-# TODO delegate this to a Roller
-sub roll_dice {
-  my ($self, $dice, $label) = @_;
-
-  return $dice if $dice !~ /d/;
-
-  my $result;
-
-  if ($self->manual) {
-    local $| = 1;
-    my $default = Games::Dice::roll($dice);
-    $dice .= " for $label" if $label;
-    print "rolling $dice [$default]: ";
-    my $result = <STDIN>;
-    chomp $result;
-    $result = $default unless length $result;
-    return $result;
-  } else {
-    my $result = Games::Dice::roll($dice);
-    say "rolled $dice for $label: $result" if $self->debug;
-    return $result;
-  }
-
-  return $result;
-}
+has roller => (
+  is   => 'ro',
+  isa  => 'Object', # Roland::Roller
+  lazy => 1,
+  handles => [ 'roll_dice' ],
+  default => sub {
+    $_[0]->manual ? Roland::Roller::Manual->new({ hub => $_[0] })
+                  : Roland::Roller::Random->new({ hub => $_[0] })
+  },
+);
 
 1;
