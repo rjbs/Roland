@@ -7,10 +7,12 @@ use Games::Dice;
 use List::AllUtils qw(sum);
 use Params::Util qw(_ARRAY _HASH);
 use Roland::Result::Error;
-use Roland::Result::Monster;
 use Roland::Result::Multi;
 use Roland::Result::None;
 use Roland::Result::Simple;
+use Roland::Table::Group;
+use Roland::Table::Monster;
+use Roland::Table::Standard;
 use YAML::Tiny;
 
 sub resolve_table {
@@ -67,64 +69,18 @@ sub roll_table {
   my ($header, $tables) = $self->_header_and_rest($input);
 
   if ($header->{type} eq 'monster') {
-    return Roland::Result::Monster->from_data($tables, $self);
+    return Roland::Table::Monster->from_data($tables, $self)->roll_table;
   }
 
   if ($header->{type} eq 'group') {
-    # XXX: Make it possible to have a "how many" that's like the "times"
-    # option for "table" tables.  Given a long list, it would choose $x items
-    # from the list, possibly never picking the same once twice.  That will
-    # require being able to specify a "group" table as a mapping, rather than
-    # only the then-sugar form of a sequence. -- rjbs, 2012-11-30
-    die "multiple documents in group table" if @$tables > 1;
-    my @list = @{ $tables->[0] };
-
-    my @group;
-    for my $i (0 .. $#list) {
-      my $result = $self->_result_for_line(
-        $list[$i],
-        $input,
-        "$name:$i",
-      );
-
-      push @group, $result unless $result->isa('Roland::Result::None');
-    }
-
-    return Roland::Result::Multi->new({ results => \@group });
+    return Roland::Table::Group->from_data($tables, $self)->roll_table;
   }
 
-  die "multiple documents in standard table" if @$tables > 1;
-  my $table = $tables->[0];
-
-  $name //= "?";
-  my @dice_str = split / \+ /, $table->{dice};
-
-  my @results;
-  for my $i (
-    1 .. $self->roll_dice($table->{times} // 1, "times to roll on $name")
-  ) {
-    my $total = sum 0, map { $self->roll_dice($_, $name) } @dice_str;
-
-    my %case;
-    for my $key (keys %{ $table->{results} }) {
-      if ($key =~ /-/) {
-        my ($min, $max) = split /-/, $key;
-        $case{ $_ } = $table->{results}{$key} for $min .. $max;
-      } else {
-        $case{ $key } = $table->{results}{$key};
-      }
-    }
-
-    my $payload = $case{ $total };
-
-    my $result = $self->_result_for_line($payload, $input, $name);
-    push @results, $result unless $result->isa('Roland::Result::None');
+  if ($header->{type} eq 'table') {
+    return Roland::Table::Standard->from_data($tables, $self)->roll_table;
   }
 
-  # must return a Result object
-  return Roland::Result::None->new unless @results;
-  return $results[0] if @results == 1;
-  return Roland::Result::Multi->new({ results => \@results });
+  die "wtf";
 }
 
 sub _result_for_line {
