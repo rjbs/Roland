@@ -6,7 +6,6 @@ use namespace::autoclean;
 
 use Data::Bucketeer;
 use Text::Autoformat;
-use YAML::Tiny;
 
 has name  => (is => 'ro');
 has hit_dice => (is => 'ro');
