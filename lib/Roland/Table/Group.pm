@@ -2,9 +2,10 @@ package Roland::Table::Group;
 use Moose;
 with 'Roland::Table';
 
-use Roland::Result::Multi;
-
 use namespace::autoclean;
+
+use List::AllUtils 'shuffle';
+use Roland::Result::Multi;
 
 has _guts => (
   is => 'ro',
@@ -29,8 +30,15 @@ sub roll_table {
 
   my @list = @{ $self->_guts->{items} };
 
+  my @keys = (0 .. $#list);
+  if ($self->_guts->{pick}) {
+    my @shuffled_keys = shuffle @keys;
+    splice @shuffled_keys, $self->_guts->{pick};
+    @keys = sort { $a <=> $b } @shuffled_keys;
+  }
+
   my @group;
-  for my $i (0 .. $#list) {
+  for my $i (@keys) {
     my $result = $self->hub->_result_for_line(
       $list[$i],
       $self,
