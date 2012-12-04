@@ -22,10 +22,11 @@ sub from_data {
 }
 
 sub roll_table {
-  my ($self) = @_;
+  my ($self, $override) = @_;
+  $override //= {};
 
   # TODO: barf about extra table entries?
-  my $main = $self->_guts;
+  my $main = { %{ $self->_guts }, %$override };
   my $name = $main->{Name} // "(unknown)";
   my $num_dice = $main->{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
