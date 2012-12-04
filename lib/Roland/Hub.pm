@@ -91,28 +91,18 @@ sub _result_for_line {
 
   return Roland::Result::None->new unless defined $payload;
 
-  if (ref $payload) {
-    # Almost certainly this blind "wrap it in a []" needs to be revised later,
-    # but for now it should work just fine. -- rjbs, 2012-11-30
-    return $self->roll_table([$payload], "$name/sub");
+  return Roland::Result::Simple->new({ text => $payload }) unless ref $payload;
+
+  if (_HASH($payload) && keys(%$payload) == 1) {
+    my ($method, $arg) = %$payload;
+
+    $method = 'roll_table' if $method eq 'table';
+    $method = 'roll_table_file' if $method eq 'file';
+    $method = 'resolve_multi' if $method eq 'times';
+    return $self->$method($arg, $table);
   }
 
-  my ($type, $rest) = split /\s+/, $payload, 2;
-
-  my $method = $type eq 'T' ? 'resolve_table'
-             : $type eq 'x' ? 'resolve_multi'
-             # : $type eq 'G' ? 'resolve_goto'
-             : $type eq '=' ? '_resolve_simple'
-             :                undef;
-
-  unless ($method) {
-    return Roland::Result::Error->new({
-      resource => "instruction <$payload>",
-      error    => "don't know how to dispatch",
-    });
-  }
-
-  my $result = $self->$method($rest, $table, $name);
+  return $self->roll_table([$payload]);
 }
 
 sub _resolve_simple {
