@@ -48,22 +48,16 @@ sub roll_table_file {
   $self->roll_table( $data, $fn );
 }
 
-sub _header_and_rest {
+sub _type_and_rest {
   my ($self, $data) = @_;
 
-  if (! ref $data->[0]) {
-    die "ill-formed document" if @$data > 2;
+  die "ill-formed document: @$data" if @$data > 1;
 
-    return (
-      { type => $data->[0] },
-      $data->[1],
-    )
-  }
+  return ($data->[0]{type} => $data->[0])
+    if _HASH($data->[0]) && $data->[0]{type};
 
-  die "ill-formed document" if @$data > 1;
-
-  return ({ type => 'table' } => $data->[0]) if _HASH($data->[0]);
-  return ({ type => 'group' } => { items => $data->[0] }) if _ARRAY($data->[0]);
+  return (table => $data->[0]) if _HASH($data->[0]);
+  return (group => { items => $data->[0] }) if _ARRAY($data->[0]);
 
   Carp::croak("no idea what to do with table input: $data->[0]");
 }
@@ -79,9 +73,13 @@ my %CLASS_FOR_TYPE = (
 sub roll_table {
   my ($self, $input, $name) = @_;
 
-  my ($header, $tables) = $self->_header_and_rest($input);
+  my ($type, $tables) = $self->_type_and_rest($input);
 
-  if (my $class = $CLASS_FOR_TYPE{ $header->{type} }) {
+  if ($type eq 'file') {
+    return $self->roll_table_file($tables);
+  }
+
+  if (my $class = $CLASS_FOR_TYPE{ $type }) {
     return $class->from_data($tables, $self)->roll_table;
   }
 
