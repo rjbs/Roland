@@ -94,7 +94,7 @@ sub roll_table {
   }
 
   my $ac  = $main->{ac} // '?';
-  my $mv  = $main->{Movement}      // '?';
+  my $mv  = $main->{mv}      // '?';
   my $dmg = $main->{Damage}        // '?';
 
   my $xp   = $self->xp_for_monster($main) || '?';
