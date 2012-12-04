@@ -24,7 +24,7 @@ sub roll_table {
   my ($self) = @_;
 
   # TODO: barf about extra table entries?
-  my $main = $self->_guts->[0];
+  my $main = $self->_guts;
   my $name = $main->{Name} // "(unknown)";
   my $num_dice = $main->{stats}{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
