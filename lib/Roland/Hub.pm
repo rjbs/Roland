@@ -17,7 +17,7 @@ use Roland::Table::Standard;
 use YAML::XS ();
 
 sub roll_table_file {
-  my ($self, $fn) = @_;
+  my ($self, $fn, @rest) = @_;
 
   unless ($fn) {
     return Roland::Result::Error->new({
