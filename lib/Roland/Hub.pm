@@ -19,6 +19,13 @@ use YAML::XS ();
 sub roll_table_file {
   my ($self, $fn) = @_;
 
+  unless ($fn) {
+    return Roland::Result::Error->new({
+      resource => '?',
+      error    => "no filename given"
+    });
+  }
+
   unless (-e $fn) {
     return Roland::Result::Error->new({
       resource => $fn,
