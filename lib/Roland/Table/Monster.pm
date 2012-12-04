@@ -28,7 +28,7 @@ sub roll_table {
   # TODO: barf about extra table entries?
   my $main = { %{ $self->_guts }, %$override };
   my $name = $main->{name} // "(unknown)";
-  my $num_dice = $main->{'No. Appearing'} // '?';
+  my $num_dice = $main->{num} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/
           ? $self->hub->roll_dice($num_dice, "number of $name")
