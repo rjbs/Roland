@@ -93,7 +93,7 @@ sub roll_table {
     }
   }
 
-  my $ac  = $main->{'Armor Class'} // '?';
+  my $ac  = $main->{ac} // '?';
   my $mv  = $main->{Movement}      // '?';
   my $dmg = $main->{Damage}        // '?';
 
