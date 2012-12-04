@@ -34,7 +34,7 @@ sub roll_table {
           ? $self->hub->roll_dice($num_dice, "number of $name")
           : $num_dice;
 
-  my $HD = $main->{'Hit Dice'} // '?';
+  my $HD = $main->{hd} // '?';
   my @hd = split /\s+/, $HD;
   my $hd = do {
     local $" = '';
@@ -155,7 +155,7 @@ sub xp_for_monster {
   my ($self, $monster) = @_;
   my $bonuses = @{ $monster->{'XP Bonuses'} // [] };
 
-  return 0 unless my $hd = $monster->{'Hit Dice'};
+  return 0 unless my $hd = $monster->{hd};
   my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
   $bonus = ($sign || $bonus) ? "$sign$bonus" : 0;
 
