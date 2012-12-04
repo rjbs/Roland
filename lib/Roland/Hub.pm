@@ -75,10 +75,6 @@ sub roll_table {
 
   my ($type, $tables) = $self->_type_and_rest($input);
 
-  if ($type eq 'file') {
-    return $self->roll_table_file($tables);
-  }
-
   if (my $class = $CLASS_FOR_TYPE{ $type }) {
     return $class->from_data($tables, $self)->roll_table;
   }
@@ -86,25 +82,44 @@ sub roll_table {
   die "wtf";
 }
 
+my %CMD_METHOD = (
+  table   => 'roll_table',
+  file    => 'roll_table_file',
+  times   => 'roll_multi',
+  replace => 'replace',
+  append  => 'append',
+);
+
 sub _result_for_line {
   my ($self, $payload, $table, $name) = @_;
 
-  return Roland::Result::None->new unless defined $payload;
+  my $result = eval {
+    return Roland::Result::None->new unless defined $payload;
 
-  return Roland::Result::Simple->new({ text => $payload }) unless ref $payload;
+    return Roland::Result::Simple->new({ text => $payload }) if ! ref $payload;
 
-  if (_HASH($payload) && keys(%$payload) == 1) {
-    my ($method, $arg) = %$payload;
+    if (_HASH($payload) && keys(%$payload) == 1) {
+      my ($instruction, $arg) = %$payload;
 
-    $method = 'roll_table' if $method eq 'table';
-    $method = 'roll_table_file' if $method eq 'file';
-    $method = 'resolve_multi' if $method eq 'times';
-    $method = 'replace' if $method eq 'replace';
-    $method = 'append' if $method eq 'also';
-    return $self->$method($arg, $table);
-  }
+      my $method = $CMD_METHOD{ $instruction } || sub {
+        Roland::Result::Error->new({
+          resource => $name || "table",
+          error    => "encountered unknown instruction: $instruction",
+        });
+      };
 
-  return $self->roll_table([$payload]);
+      return $self->$method($arg, $table);
+    }
+
+    return $self->roll_table([$payload]);
+  };
+
+  return $result if $result;
+
+  Roland::Result::Error->new({
+    resource => $name || "table",
+    error    => "error while rolling table: $@",
+  });
 }
 
 sub replace {
@@ -127,18 +142,8 @@ sub _resolve_simple {
   Roland::Result::Simple->new({ text => $_[1] })
 }
 
-#sub resolve_goto {
-#  my ($self, $string, $table, $name) = @_;
-#
-#  my ($method, $arg) = $self->_plan_for_string($string);
-#  my $text = $self->$method($arg, $table, $name);
-#}
-
-sub resolve_multi {
+sub roll_multi {
   my ($self, $x, $table, $name) = @_;
-
-  # XXX: no, this should get a list of [ $table, $name ] tuples to combine or
-  # something -- rjbs, 2012-11-27
 
   my $num = $self->roll_dice($x, "times to roll on $name");
 
