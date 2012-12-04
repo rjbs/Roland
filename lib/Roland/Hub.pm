@@ -16,12 +16,6 @@ use Roland::Table::Monster;
 use Roland::Table::Standard;
 use YAML::XS ();
 
-sub resolve_table {
-  my ($self, $table) = @_;
-
-  $self->roll_table_file($table);
-}
-
 sub roll_table_file {
   my ($self, $fn) = @_;
 
@@ -143,10 +137,6 @@ sub append {
   die Roland::Redirect::Append->new({
     result => $self->_result_for_line($arg, $table),
   });
-}
-
-sub _resolve_simple {
-  Roland::Result::Simple->new({ text => $_[1] })
 }
 
 sub roll_multi {
