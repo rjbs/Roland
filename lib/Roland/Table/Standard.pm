@@ -46,7 +46,7 @@ sub roll_table {
 
     my $payload = $case{ $total };
 
-    my $result = $self->hub->_result_for_line($payload, $self, $name);
+    my $result = $self->_result_for_line($payload);
     push @results, $result unless $result->isa('Roland::Result::None');
   }
 

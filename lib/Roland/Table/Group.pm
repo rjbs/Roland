@@ -39,9 +39,8 @@ sub roll_table {
 
   my @group;
   for my $i (@keys) {
-    my $result = $self->hub->_result_for_line(
+    my $result = $self->_result_for_line(
       $list[$i],
-      $self,
       "name:$i", # should be our name
     );
 

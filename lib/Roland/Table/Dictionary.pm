@@ -33,7 +33,7 @@ sub roll_table {
   for my $pair (@slots) {
     warn "too many / not enough keys" unless 1 == (my ($key) = keys %$pair);
 
-    my $result = $self->hub->_result_for_line(
+    my $result = $self->_result_for_line(
       $pair->{$key},
       $self,
       "name:$pair->{$key}", # should be our name

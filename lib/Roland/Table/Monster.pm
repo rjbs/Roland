@@ -47,7 +47,7 @@ sub roll_table {
   EXTRA: for my $extra (@{ $main->{extras} || [] }) {
     my $desc = $extra->{label};
 
-    my $result = eval { $self->hub->roll_table([$extra], "$name/$desc"); };
+    my $result = eval { $self->build_and_roll_table($extra, "$name/$desc"); };
 
     unless ($result) {
       my $error = $@;
@@ -73,7 +73,7 @@ sub roll_table {
         my $desc = $unit_extra->{label};
 
         my $result = eval {
-          $self->hub->roll_table([$unit_extra], "$name/$desc");
+          $self->build_and_roll_table($unit_extra, "$name/$desc");
         };
 
         unless ($result) {
