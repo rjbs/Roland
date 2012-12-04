@@ -14,7 +14,7 @@ use Roland::Table::Dictionary;
 use Roland::Table::Group;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
-use YAML::Tiny;
+use YAML::XS ();
 
 sub resolve_table {
   my ($self, $table) = @_;
@@ -32,12 +32,16 @@ sub roll_table_file {
     });
   }
 
-  my $data = YAML::Tiny->read($fn);
+  my $data = eval {
+    my @data = YAML::XS::LoadFile($fn);
+    \@data;
+  };
+  my $error = $@ || "(unknown error)";
 
   unless ($data) {
     return Roland::Result::Error->new({
       resource => $fn,
-      error    => $YAML::Tiny::errstr,
+      error    => $error,
     });
   }
 
