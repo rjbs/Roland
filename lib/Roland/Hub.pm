@@ -3,8 +3,6 @@ package Roland::Hub;
 use Moose;
 use 5.12.0;
 
-use Games::Dice;
-use List::AllUtils qw(sum);
 use Params::Util qw(_ARRAY _HASH);
 use Roland::Result::Error;
 use Roland::Result::Multi;
