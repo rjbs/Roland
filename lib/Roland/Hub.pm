@@ -99,10 +99,28 @@ sub _result_for_line {
     $method = 'roll_table' if $method eq 'table';
     $method = 'roll_table_file' if $method eq 'file';
     $method = 'resolve_multi' if $method eq 'times';
+    $method = 'replace' if $method eq 'replace';
+    $method = 'append' if $method eq 'also';
     return $self->$method($arg, $table);
   }
 
   return $self->roll_table([$payload]);
+}
+
+sub replace {
+  my ($self, $arg, $table) = @_;
+  require Roland::Redirect::Replace;
+  die Roland::Redirect::Replace->new({
+    result => $self->_result_for_line($arg, $table),
+  });
+}
+
+sub append {
+  my ($self, $arg, $table) = @_;
+  require Roland::Redirect::Append;
+  die Roland::Redirect::Append->new({
+    result => $self->_result_for_line($arg, $table),
+  });
 }
 
 sub _resolve_simple {
