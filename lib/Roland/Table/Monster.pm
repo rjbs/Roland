@@ -4,6 +4,7 @@ with 'Roland::Table';
 
 use Data::Bucketeer;
 use Roland::Result::Monster;
+use Roland::Result::Multi;
 
 use namespace::autoclean;
 
@@ -26,13 +27,13 @@ sub roll_table {
   # TODO: barf about extra table entries?
   my $main = $self->_guts;
   my $name = $main->{Name} // "(unknown)";
-  my $num_dice = $main->{stats}{'No. Appearing'} // '?';
+  my $num_dice = $main->{'No. Appearing'} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/
           ? $self->hub->roll_dice($num_dice, "number of $name")
           : $num_dice;
 
-  my $HD = $main->{stats}{'Hit Dice'} // '?';
+  my $HD = $main->{'Hit Dice'} // '?';
   my @hd = split /\s+/, $HD;
   my $hd = do {
     local $" = '';
@@ -40,38 +41,65 @@ sub roll_table {
     "$hd[0]$d@hd[ 1 .. $#hd]"
   };
 
-  my @units = $num eq '?'
-    ? ()
-    : map {; { hp => $self->hub->roll_dice($hd, "$name \#$_ hp") } } 1 .. $num;
+  my @also;
 
   my %extra;
-  for my $extra (@{ $main->{extras} || [] }) {
+  EXTRA: for my $extra (@{ $main->{extras} || [] }) {
     my $desc = $extra->{label};
 
-    my $result = $self->hub->roll_table([$extra], "$name/$desc");
-    # TODO reinstate encounter redirects
+    my $result = eval { $self->hub->roll_table([$extra], "$name/$desc"); };
+
+    unless ($result) {
+      my $error = $@;
+      if (eval { $error->isa('Roland::Redirect::Replace') }) {
+        return $error->actual_result;
+      }
+      if (eval { $error->isa('Roland::Redirect::Append') }) {
+        push @also, $error->actual_result;
+        next EXTRA;
+      }
+      die $error;
+    }
+
     $extra{ $desc } = $result;
   }
 
-  for my $unit_extra (@{ $main->{'per-unit'} || [] }) {
-    my $desc = $unit_extra->{label};
+  my @units;
+  if ($num ne '?') {
+    UNIT: for (1 .. $num) {
+      my $unit = { hp => $self->hub->roll_dice($hd, "$name \#$_ hp") };
 
-    UNIT: for my $unit (@units) {
-      my $result = $self->hub->roll_table([$unit_extra], "$name/$desc");
-      # TODO reinstate unit redirects
+      for my $unit_extra (@{ $main->{'per-unit'} || [] }) {
+        my $desc = $unit_extra->{label};
 
-      $unit->{ $desc } = $result;
+        my $result = eval {
+          $self->hub->roll_table([$unit_extra], "$name/$desc");
+        };
+
+        unless ($result) {
+          my $error = $@;
+          if (eval { $error->isa('Roland::Redirect::Replace') }) {
+            push @also, $error->actual_result;
+            next UNIT;
+          }
+          die $error;
+        }
+
+        $unit->{ $desc } = $result;
+      }
+
+      push @units, $unit;
     }
   }
 
-  my $ac  = $main->{stats}{'Armor Class'} // '?';
-  my $mv  = $main->{stats}{Movement}      // '?';
-  my $dmg = $main->{stats}{Damage}        // '?';
+  my $ac  = $main->{'Armor Class'} // '?';
+  my $mv  = $main->{Movement}      // '?';
+  my $dmg = $main->{Damage}        // '?';
 
   my $xp   = $self->xp_for_monster($main) || '?';
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
 
-  return Roland::Result::Monster->new(
+  my $result = Roland::Result::Monster->new(
     name  => $name,
     hit_dice => $HD,
     damage   => $dmg,
@@ -82,6 +110,14 @@ sub roll_table {
     extras => \%extra,
     units  => \@units,
   );
+
+  my @final;
+  push @final, $result if @units or $num eq '?';
+  push @final, @also;
+
+  return @final  > 1 ? Roland::Result::Multi->new({ results => [ @final ] })
+       : @final == 1 ? $final[0]
+       :               Roland::Result::None->new;
 }
 
 my $XP_LOOKUP = Data::Bucketeer->new('>=' => {
@@ -118,7 +154,7 @@ sub xp_for_monster {
   my ($self, $monster) = @_;
   my $bonuses = @{ $monster->{'XP Bonuses'} // [] };
 
-  return 0 unless my $hd = $monster->{stats}{'Hit Dice'};
+  return 0 unless my $hd = $monster->{'Hit Dice'};
   my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
   $bonus = ($sign || $bonus) ? "$sign$bonus" : 0;
 

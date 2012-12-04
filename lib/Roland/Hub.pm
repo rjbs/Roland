@@ -48,22 +48,16 @@ sub roll_table_file {
   $self->roll_table( $data, $fn );
 }
 
-sub _header_and_rest {
+sub _type_and_rest {
   my ($self, $data) = @_;
 
-  if (! ref $data->[0]) {
-    die "ill-formed document" if @$data > 2;
+  die "ill-formed document: @$data" if @$data > 1;
 
-    return (
-      { type => $data->[0] },
-      $data->[1],
-    )
-  }
+  return ($data->[0]{type} => $data->[0])
+    if _HASH($data->[0]) && $data->[0]{type};
 
-  die "ill-formed document" if @$data > 1;
-
-  return ({ type => 'table' } => $data->[0]) if _HASH($data->[0]);
-  return ({ type => 'group' } => { items => $data->[0] }) if _ARRAY($data->[0]);
+  return (table => $data->[0]) if _HASH($data->[0]);
+  return (group => { items => $data->[0] }) if _ARRAY($data->[0]);
 
   Carp::croak("no idea what to do with table input: $data->[0]");
 }
@@ -79,9 +73,13 @@ my %CLASS_FOR_TYPE = (
 sub roll_table {
   my ($self, $input, $name) = @_;
 
-  my ($header, $tables) = $self->_header_and_rest($input);
+  my ($type, $tables) = $self->_type_and_rest($input);
 
-  if (my $class = $CLASS_FOR_TYPE{ $header->{type} }) {
+  if ($type eq 'file') {
+    return $self->roll_table_file($tables);
+  }
+
+  if (my $class = $CLASS_FOR_TYPE{ $type }) {
     return $class->from_data($tables, $self)->roll_table;
   }
 
@@ -93,28 +91,36 @@ sub _result_for_line {
 
   return Roland::Result::None->new unless defined $payload;
 
-  if (ref $payload) {
-    # Almost certainly this blind "wrap it in a []" needs to be revised later,
-    # but for now it should work just fine. -- rjbs, 2012-11-30
-    return $self->roll_table([$payload], "$name/sub");
+  return Roland::Result::Simple->new({ text => $payload }) unless ref $payload;
+
+  if (_HASH($payload) && keys(%$payload) == 1) {
+    my ($method, $arg) = %$payload;
+
+    $method = 'roll_table' if $method eq 'table';
+    $method = 'roll_table_file' if $method eq 'file';
+    $method = 'resolve_multi' if $method eq 'times';
+    $method = 'replace' if $method eq 'replace';
+    $method = 'append' if $method eq 'also';
+    return $self->$method($arg, $table);
   }
 
-  my ($type, $rest) = split /\s+/, $payload, 2;
+  return $self->roll_table([$payload]);
+}
 
-  my $method = $type eq 'T' ? 'resolve_table'
-             : $type eq 'x' ? 'resolve_multi'
-             # : $type eq 'G' ? 'resolve_goto'
-             : $type eq '=' ? '_resolve_simple'
-             :                undef;
+sub replace {
+  my ($self, $arg, $table) = @_;
+  require Roland::Redirect::Replace;
+  die Roland::Redirect::Replace->new({
+    result => $self->_result_for_line($arg, $table),
+  });
+}
 
-  unless ($method) {
-    return Roland::Result::Error->new({
-      resource => "instruction <$payload>",
-      error    => "don't know how to dispatch",
-    });
-  }
-
-  my $result = $self->$method($rest, $table, $name);
+sub append {
+  my ($self, $arg, $table) = @_;
+  require Roland::Redirect::Append;
+  die Roland::Redirect::Append->new({
+    result => $self->_result_for_line($arg, $table),
+  });
 }
 
 sub _resolve_simple {

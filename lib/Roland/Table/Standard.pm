@@ -30,15 +30,17 @@ sub roll_table {
   for my $i (
     1 .. $self->hub->roll_dice($table->{times} // 1, "times to roll on $name")
   ) {
+    my %results = %{ $table->{results} };
+
     my $total = sum 0, map { $self->hub->roll_dice($_, $name) } @dice_str;
 
     my %case;
-    for my $key (keys %{ $table->{results} }) {
+    for my $key (keys %results) {
       if ($key =~ /-/) {
         my ($min, $max) = split /-/, $key;
-        $case{ $_ } = $table->{results}{$key} for $min .. $max;
+        $case{ $_ } = $results{$key} for $min .. $max;
       } else {
-        $case{ $key } = $table->{results}{$key};
+        $case{ $key } = $results{$key};
       }
     }
 
