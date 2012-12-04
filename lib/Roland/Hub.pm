@@ -45,21 +45,28 @@ sub roll_table_file {
     });
   }
 
-  $self->roll_table( $data, $fn );
+  unless (@$data) {
+    return Roland::Result::Error->new({
+      resource => $fn,
+      error    => "file contained no documents",
+    });
+  }
+
+  warn "ignoring documents after the first in $fn" if @$data > 1;
+
+  $self->roll_table( $data->[0], $fn );
 }
 
 sub _type_and_rest {
   my ($self, $data) = @_;
 
-  die "ill-formed document: @$data" if @$data > 1;
+  return ($data->{type} => $data)
+    if _HASH($data) && $data->{type};
 
-  return ($data->[0]{type} => $data->[0])
-    if _HASH($data->[0]) && $data->[0]{type};
+  return (table => $data) if _HASH($data);
+  return (group => { items => $data }) if _ARRAY($data);
 
-  return (table => $data->[0]) if _HASH($data->[0]);
-  return (group => { items => $data->[0] }) if _ARRAY($data->[0]);
-
-  Carp::croak("no idea what to do with table input: $data->[0]");
+  Carp::croak("no idea what to do with table input: $data");
 }
 
 # Make this a registry -- rjbs, 2012-12-03
@@ -111,7 +118,7 @@ sub _result_for_line {
       return $self->$method($arg, $table);
     }
 
-    return $self->roll_table([$payload]);
+    return $self->roll_table($payload);
   };
 
   return $result if $result;
