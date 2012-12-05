@@ -12,17 +12,18 @@ has _guts => (
 );
 
 sub from_data {
-  my ($class, $table, $hub) = @_;
+  my ($class, $name, $data, $hub) = @_;
 
   return $class->new({
-    _guts => $table,
+    name  => $name,
+    _guts => $data,
     hub   => $hub,
   });
 }
 
 sub roll_table {
   my ($self) = @_;
-  my $name //= "?";
+  my $name = $self->name;
   my $table = $self->_guts;
   my @dice_str = split / \+ /, $table->{dice};
 
@@ -46,7 +47,7 @@ sub roll_table {
 
     my $payload = $case{ $total };
 
-    my $result = $self->_result_for_line($payload);
+    my $result = $self->_result_for_line($payload, "result $total");
     push @results, $result unless $result->isa('Roland::Result::None');
   }
 
