@@ -153,7 +153,7 @@ my $XP_LOOKUP = Data::Bucketeer->new('>=' => {
 
 sub xp_for_monster {
   my ($self, $monster) = @_;
-  my $bonuses = @{ $monster->{'XP Bonuses'} // [] };
+  my $bonuses = @{ $monster->{'xp-bonuses'} // [] };
 
   return 0 unless my $hd = $monster->{hd};
   my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
