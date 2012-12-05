@@ -16,9 +16,10 @@ has _guts => (
 # - Label: table
 
 sub from_data {
-  my ($class, $data, $hub) = @_;
+  my ($class, $name, $data, $hub) = @_;
 
   return $class->new({
+    name  => $name,
     _guts => $data,
     hub   => $hub,
   });
@@ -35,8 +36,7 @@ sub roll_table {
 
     my $result = $self->_result_for_line(
       $pair->{$key},
-      $self,
-      "name:$pair->{$key}", # should be our name
+      $key,
     );
 
     push @results, [ $key, $result ];

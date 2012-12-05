@@ -13,9 +13,10 @@ has _guts => (
 );
 
 sub from_data {
-  my ($class, $data, $hub) = @_;
+  my ($class, $name, $data, $hub) = @_;
 
   return $class->new({
+    name  => $name,
     _guts => $data,
     hub   => $hub,
   });
@@ -48,7 +49,7 @@ sub roll_table {
   EXTRA: for my $extra (@{ $main->{extras} || [] }) {
     my $desc = $extra->{label};
 
-    my $result = eval { $self->build_and_roll_table($extra, "$name/$desc"); };
+    my $result = eval { $self->build_and_roll_table("extra::$desc", $extra); };
 
     unless ($result) {
       my $error = $@;
@@ -74,7 +75,7 @@ sub roll_table {
         my $desc = $unit_extra->{label};
 
         my $result = eval {
-          $self->build_and_roll_table($unit_extra, "$name/$desc");
+          $self->build_and_roll_table("unit-extra::$desc", $unit_extra);
         };
 
         unless ($result) {

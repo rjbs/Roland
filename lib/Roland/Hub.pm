@@ -55,7 +55,7 @@ sub roll_table_file {
 
   warn "ignoring documents after the first in $fn" if @$data > 1;
 
-  $self->build_and_roll_table( $data->[0], $fn, @rest );
+  $self->build_and_roll_table( $fn, $data->[0], @rest );
 }
 
 sub _type_and_rest {
@@ -79,12 +79,12 @@ my %CLASS_FOR_TYPE = (
 );
 
 sub build_and_roll_table {
-  my ($self, $input, $name, @rest) = @_;
+  my ($self, $name, $data, @rest) = @_;
 
-  my ($type, $tables) = $self->_type_and_rest($input);
+  my ($type, $table) = $self->_type_and_rest($data);
 
   if (my $class = $CLASS_FOR_TYPE{ $type }) {
-    return $class->from_data($tables, $self)->roll_table(@rest);
+    return $class->from_data($name, $table, $self)->roll_table(@rest);
   }
 
   Roland::Result::Error->new({

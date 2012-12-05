@@ -1,5 +1,6 @@
 package Roland::Table;
 use Moose::Role;
+use 5.12.0;
 
 use namespace::autoclean;
 
@@ -18,10 +19,25 @@ has hub => (
   ) ],
 );
 
+has name => (
+  is  => 'ro',
+  isa => 'Str',
+  builder => '_build_name',
+);
+
+sub _build_name {
+  my ($self) = @_;
+  state $i = 1;
+  sprintf '%s<%s>', (ref $self), $i++;
+}
+
 sub roll_multi {
   my ($self, $times) = @_;
 
-  my $num = $self->roll_dice($times, "times to roll on $self"); # XXX ->name
+  my $num = $self->roll_dice(
+    $times,
+    "times to roll on " . $self->name
+  );
 
   my @results = map { $self->roll_table } (1 .. $num);
   return Roland::Result::Multi->new({ results => \@results });
@@ -55,37 +71,35 @@ sub method_for_instruction {
   return $CMD_METHOD{ $instruction };
 }
 
+sub subtable_name {
+  my ($self, $key) = @_;
+  return $self->name . q{, } . ($key // "?");
+}
+
 sub _result_for_line {
   my ($self, $payload, $name) = @_;
 
-  # my $result = eval {
-    return Roland::Result::None->new unless defined $payload;
+  my $line_name = $self->subtable_name($name);
 
-    return Roland::Result::Simple->new({ text => $payload }) if ! ref $payload;
+  return Roland::Result::None->new unless defined $payload;
 
-    if (_HASH($payload) && keys(%$payload) == 1) {
-      my ($instruction, @args) = %$payload;
-      @args = @{ $args[0] } if _ARRAY0($args[0]);
+  return Roland::Result::Simple->new({ text => $payload }) if ! ref $payload;
 
-      my $method = $self->method_for_instruction($instruction) || sub {
-        Roland::Result::Error->new({
-          resource => $name || "table",
-          error    => "encountered unknown instruction: $instruction",
-        });
-      };
+  if (_HASH($payload) && keys(%$payload) == 1) {
+    my ($instruction, @args) = %$payload;
+    @args = @{ $args[0] } if _ARRAY0($args[0]);
 
-      return $self->$method(@args);
-    }
+    my $method = $self->method_for_instruction($instruction) || sub {
+      Roland::Result::Error->new({
+        resource => $line_name,
+        error    => "encountered unknown instruction: $instruction",
+      });
+    };
 
-    return $self->build_and_roll_table($payload, $name);
-  # };
+    return $self->$method(@args);
+  }
 
-  # return $result if $result;
-
-  Roland::Result::Error->new({
-    resource => $name || "table",
-    error    => "error while rolling table: $@",
-  });
+  return $self->build_and_roll_table($line_name, $payload);
 }
 
 requires 'roll_table';
