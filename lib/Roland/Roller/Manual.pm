@@ -2,7 +2,6 @@ package Roland::Roller::Manual;
 use Moose;
 with 'Roland::Roller';
 
-# TODO delegate this to a Roller
 sub roll_dice {
   my ($self, $dice, $label) = @_;
 
