@@ -41,6 +41,8 @@ sub roll_table {
     push @group, $result unless $result->isa('Roland::Result::None');
   }
 
+  return Roland::Result::None->new unless @group;
+  return $group[0] if @group == 1;
   return Roland::Result::Multi->new({ results => \@group });
 }
 
