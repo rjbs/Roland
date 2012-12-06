@@ -2,20 +2,10 @@ use strict;
 use warnings;
 
 use Test::More;
+use t::lib::Roland;
 
 use Roland::Hub;
 use Roland::Roller::Test;
-
-sub error_ok {
-  my ($result, $resource, $error_like, $desc) = @_;
-  $desc //= "error with $resource";
-
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-
-  isa_ok($result, 'Roland::Result::Error', $desc);
-  is($result->resource, $resource, "$desc: resource string");
-  like($result->error, $error_like, "$desc: error message");
-}
 
 my $hub = Roland::Hub->new;
 

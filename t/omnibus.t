@@ -2,39 +2,10 @@ use strict;
 use warnings;
 
 use Test::More;
+use t::lib::Roland;
 
 use Roland::Hub;
 use Roland::Roller::Test;
-
-sub test_result {
-  my ($description, $arg) = @_;
-  my $hub = Roland::Hub->new({
-    roller => Roland::Roller::Test->new({
-      random_fallback => $arg->{rand},
-      planned_rolls   => $arg->{rolls},
-      pick_n          => $arg->{pick_n} || sub {
-        my ($self, $n, $aref) = @_;
-        (@$aref)[0 .. $n - 1];
-      },
-    }),
-  });
-
-  my $result = $hub->load_table_file($arg->{file})->roll_table;
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-
-  ok($hub->roller->rolls_exhausted, "used all the dice");
-
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-  local $_ = $result;
-  $arg->{test}->($result);
-}
-
-sub simple_ok {
-  my ($got_result, $want_string, $desc) = @_;
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-  isa_ok($got_result, 'Roland::Result::Simple', $desc);
-  is($got_result->text, $want_string, qq{$desc is "$want_string"});
-}
 
 test_result("L1, rolled a 2" => {
   file  => 'eg/dungeon/encounters-L1',
@@ -146,22 +117,6 @@ test_result("L3, rolled an 1,2" => {
     simple_ok($members[1], 'Hovering Squid', 'L3 2');
   },
 });
-
-sub flatten_multi {
-  my ($multi) = @_;
-
-  my @queue  = $multi;
-  my @buffer = ();
-  while (my $next = shift @queue) {
-    if ($next->isa('Roland::Result::Multi')) {
-      unshift @queue, $next->results;
-      next;
-    }
-    push @buffer, $next;
-  }
-
-  return @buffer;
-}
 
 test_result("L3, rolled an 1,3,3,4,3,1" => {
   file   => 'eg/dungeon/encounters-L3',
