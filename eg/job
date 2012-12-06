@@ -1,4 +1,4 @@
-type: group
+type: list
 pick: 1
 items:
   - Artist

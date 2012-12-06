@@ -7,7 +7,7 @@ results:
     - { file: [ eg/monster/man, { num: 1 } ] }
     - { file: eg/plan }
     -
-      type: group
+      type: list
       pick: 1
       items:
         - canal

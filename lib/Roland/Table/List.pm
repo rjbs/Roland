@@ -1,4 +1,4 @@
-package Roland::Table::Group;
+package Roland::Table::List;
 use Moose;
 with 'Roland::Table';
 

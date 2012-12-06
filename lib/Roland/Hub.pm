@@ -11,7 +11,7 @@ use Roland::Result::Simple;
 use Roland::Roller::Manual;
 use Roland::Roller::Random;
 use Roland::Table::Dictionary;
-use Roland::Table::Group;
+use Roland::Table::List;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
 use YAML::XS ();
@@ -65,7 +65,7 @@ sub _type_and_rest {
     if _HASH($data) && $data->{type};
 
   return (table => $data) if _HASH($data);
-  return (group => { items => $data }) if _ARRAY($data);
+  return (list  => { items => $data }) if _ARRAY($data);
 
   Carp::croak("no idea what to do with table input: $data");
 }
@@ -73,7 +73,7 @@ sub _type_and_rest {
 # Make this a registry -- rjbs, 2012-12-03
 my %CLASS_FOR_TYPE = (
   monster => 'Roland::Table::Monster',
-  group   => 'Roland::Table::Group',
+  list    => 'Roland::Table::List',
   table   => 'Roland::Table::Standard',
   dict    => 'Roland::Table::Dictionary',
 );
