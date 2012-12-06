@@ -169,7 +169,7 @@ sub xp_for_monster {
 
   my $key = $hd eq '?'         ? return('?')
           : $hd =~ /\A<\s*1\z/ ? '0.9'
-          : $hd =~ $HD_RE      ? $1 + ($2 ? ($2.'.1') : '')
+          : $hd =~ $HD_RE      ? $1 + ($2 ? ($2.'.1') : '0')
           :                      '?'; # warn? -- rjbs, 2012-12-06
 
   my $pair = $XP_LOOKUP->result_for($key);
