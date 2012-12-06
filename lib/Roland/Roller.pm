@@ -10,4 +10,7 @@ has hub => (
   weak_ref => 1,
 );
 
+requires 'roll_dice';
+requires 'pick_n';
+
 1;

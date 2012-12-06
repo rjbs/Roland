@@ -4,12 +4,22 @@ with 'Roland::Roller';
 
 has planned_results => (
   isa => 'ArrayRef[Int]',
-  traits  => 'Array',
+  traits  => [ 'Array' ],
   default => sub {  []  },
   handles => {
     _next_result  => 'shift',
-    clear_results => 'empty',
+    clear_results => 'clear',
     push_results  => 'push',
+  },
+);
+
+sub pick_n;
+has pick_n => (
+  isa    => 'CodeRef',
+  traits => [ 'Code' ],
+  required => 1,
+  handles  => {
+    pick_n => 'execute_method',
   },
 );
 

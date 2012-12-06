@@ -19,4 +19,9 @@ sub roll_dice {
   return $result;
 }
 
+sub pick_n {
+  warn "Manual roller does not implement pick_n yet, using Random\n";
+  goto &Roland::Roller::Random::pick_n;
+}
+
 1;
