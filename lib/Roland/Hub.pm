@@ -58,7 +58,7 @@ sub _type_and_rest {
   return (table => $data) if _HASH($data);
   return (list  => { items => $data }) if _ARRAY($data);
 
-  Carp::croak("no idea what to do with table input: $data");
+  return;
 }
 
 # Make this a registry -- rjbs, 2012-12-03
@@ -72,7 +72,8 @@ my %CLASS_FOR_TYPE = (
 sub build_table {
   my ($self, $name, $data) = @_;
 
-  my ($type, $table) = $self->_type_and_rest($data);
+  return $self->__error_table($name => "no idea what to do with input $data")
+    unless my ($type, $table) = $self->_type_and_rest($data);
 
   if (my $class = $CLASS_FOR_TYPE{ $type }) {
     return $class->from_data($name, $table, $self);
