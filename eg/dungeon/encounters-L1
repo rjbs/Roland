@@ -1,0 +1,31 @@
+dice: 1d4 + 1d4
+results:
+  2:  Instant death
+  3:  { file: eg/dungeon/encounters-L2 }
+  3:  { file: eg/monster/zombie }
+  4:
+    - { file: [ eg/monster/man, { num: 1 } ] }
+    - { file: eg/plan }
+    -
+      type: group
+      pick: 1
+      items:
+        - canal
+        - stream
+        - creek
+        - river
+    - Panama
+  5:
+    dice: 1d6
+    results:
+      1-2: Tinker
+      3-4: Tailor
+      5: Soldier
+      6:
+        type: dict
+        entries:
+          - Actually: Spy
+          - Cover: { file: eg/job }
+  6: ~
+  7: { times: 2 }
+  8: ~

@@ -1,0 +1,14 @@
+type: monster
+name: Zombie
+ac: 7
+hd: 2
+mv: 90'
+attacks: 1
+damage: 1d6
+num: 2d4
+save: F2
+morale: ~
+loot: ~
+alignment: Neutral
+xp-bonuses:
+description: Zombies are not cool.
