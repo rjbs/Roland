@@ -2,8 +2,8 @@ dice: 1d4 + 1d4
 results:
   2:  Instant death
   3:  { file: eg/dungeon/encounters-L2 }
-  3:  { file: eg/monster/zombie }
-  4:
+  4:  { file: eg/monster/zombie }
+  5:
     - { file: [ eg/monster/man, { num: 1 } ] }
     - { file: eg/plan }
     -
@@ -11,11 +11,11 @@ results:
       pick: 1
       items:
         - canal
-        - stream
         - creek
         - river
+        - stream
     - Panama
-  5:
+  6:
     dice: 1d6
     results:
       1-2: Tinker
@@ -26,6 +26,5 @@ results:
         entries:
           - Actually: Spy
           - Cover: { file: eg/job }
-  6: ~
   7: { times: 2 }
   8: ~

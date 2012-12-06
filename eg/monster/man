@@ -1,0 +1,14 @@
+type: monster
+name: Man
+ac: 9
+hd: 1
+mv: 120'
+attacks: 1
+damage: 1d4
+num: 2d4
+save: N
+morale: 7
+loot: ~
+alignment: Lawful
+xp-bonuses:
+description: Just this guy, you know?

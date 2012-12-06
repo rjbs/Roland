@@ -1,0 +1,6 @@
+type: list
+pick: 1
+items:
+  - Cat
+  - Dog
+  - Wolf
