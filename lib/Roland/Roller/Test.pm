@@ -2,14 +2,15 @@ package Roland::Roller::Test;
 use Moose;
 with 'Roland::Roller';
 
-has planned_results => (
+has planned_rolls => (
   isa => 'ArrayRef[Int]',
   traits  => [ 'Array' ],
   default => sub {  []  },
   handles => {
-    _next_result  => 'shift',
-    clear_results => 'clear',
-    push_results  => 'push',
+    _next_roll  => 'shift',
+    clear_rolls => 'clear',
+    push_rolls  => 'push',
+    rolls_exhausted => 'is_empty',
   },
 );
 
@@ -23,11 +24,11 @@ has pick_n => (
   },
 );
 
-sub next_result {
+sub next_roll {
   my ($self) = @_;
-  my $next = $self->_next_result;
+  my $next = $self->_next_roll;
   return $next if defined $next;
-  Carp::croak( "tried to get a result when exhausted" );
+  Carp::croak( "tried to get a roll when exhausted" );
 }
 
 sub roll_dice {
@@ -35,7 +36,7 @@ sub roll_dice {
 
   return $dice if $dice !~ /d/;
 
-  return $self->next_result;
+  return $self->next_roll;
 }
 
 1;

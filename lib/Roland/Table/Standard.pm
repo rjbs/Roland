@@ -25,7 +25,6 @@ sub roll_table {
   my ($self) = @_;
   my $name = $self->name;
   my $table = $self->_guts;
-  my @dice_str = split / \+ /, $table->{dice};
 
   my @results;
   for my $i (
@@ -33,7 +32,7 @@ sub roll_table {
   ) {
     my %results = %{ $table->{results} };
 
-    my $total = sum 0, map { $self->hub->roll_dice($_, $name) } @dice_str;
+    my $total = $self->hub->roll_dice($table->{dice}, $name);
 
     my %case;
     for my $key (keys %results) {
