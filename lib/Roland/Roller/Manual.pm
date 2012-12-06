@@ -2,6 +2,10 @@ package Roland::Roller::Manual;
 use Moose;
 with 'Roland::Roller';
 
+use namespace::autoclean;
+
+use List::AllUtils qw(sum);
+
 sub roll_dice {
   my ($self, $dice, $label) = @_;
 
@@ -9,7 +13,11 @@ sub roll_dice {
 
   my $result;
   local $| = 1;
-  my $default = Games::Dice::roll($dice);
+  my $default = do {
+    Games::Dice::roll($dice);
+    my @dice_str = split / \+ /, $dice;
+    sum 0, map { Games::Dice::roll($_) } @dice_str;
+  };
   $dice .= " for $label" if $label;
   print "rolling $dice [$default]: ";
   $result = <STDIN>;

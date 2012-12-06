@@ -5,7 +5,7 @@ with 'Roland::Roller';
 use 5.12.0;
 
 use Games::Dice ();
-use List::AllUtils 'shuffle';
+use List::AllUtils qw(shuffle sum);
 
 use namespace::autoclean;
 
@@ -14,7 +14,9 @@ sub roll_dice {
 
   return $dice if $dice !~ /d/;
 
-  my $result = Games::Dice::roll($dice);
+  my @dice_str = split / \+ /, $dice;
+  my $result = sum 0, map { Games::Dice::roll($_) } @dice_str;
+
   say "rolled $dice for $label: $result" if $self->hub->debug;
 
   return $result;
