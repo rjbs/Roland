@@ -1,0 +1,13 @@
+type: group
+pick: 1
+items:
+  - Artist
+  - Bowyer
+  - Cooper
+  - Drover
+  - Etcher
+  - Fletcher
+  - Grocer
+  - Highwayman
+  - Inspector
+  - Jester

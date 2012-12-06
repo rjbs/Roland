@@ -54,11 +54,18 @@ test_result("rolled 5,3" => {
 });
 
 test_result("rolled 5,6" => {
-  file  => 'eg/dungeon/encounters-L1',
-  rolls => [ 5, 6 ],
-  test  => sub {
+  file   => 'eg/dungeon/encounters-L1',
+  rolls  => [ 5, 6 ],
+  pick_n => sub { $_[2][2] },
+  test   => sub {
     my $result = shift;
     isa_ok($result, 'Roland::Result::Dictionary', 'result for 5,6');
+    my @slots = $result->_results;
+    is($slots[0][0], 'Actually', "first label");
+    simple_ok($slots[0][1], 'Spy', 'first value');
+
+    is($slots[1][0], 'Cover', "second label");
+    simple_ok($slots[1][1], 'Cooper', 'second value');
   },
 });
 
