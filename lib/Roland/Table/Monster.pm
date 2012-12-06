@@ -3,6 +3,7 @@ use Moose;
 with 'Roland::Table';
 
 use Data::Bucketeer;
+use List::AllUtils qw(max);
 use Roland::Result::Monster;
 use Roland::Result::Multi;
 
@@ -22,6 +23,8 @@ sub from_data {
   });
 }
 
+my $HD_RE = qr/\A([0-9]+)(?:\s*([+-])\s*([0-9]+))?\z/;
+
 sub roll_table {
   my ($self, $override) = @_;
   $override //= {};
@@ -35,13 +38,18 @@ sub roll_table {
           ? $self->hub->roll_dice($num_dice, "number of $name")
           : $num_dice;
 
-  my $HD = $main->{hd} // '?';
-  my @hd = split /\s+/, $HD;
-  my $hd = do {
-    local $" = '';
-    my $d = $hd[0] !~ /d/ ? 'd8' : '';
-    "$hd[0]$d@hd[ 1 .. $#hd]"
-  };
+  # hd is hit dice; either "int1" or "int1 ± int2" or "< 1"
+  # hd is used for monster level, xp, etc
+  # hp is the hp generator; default based on hd
+  #   hd eq "< 1", 1d4
+  #   otherwise max(1, roll( "1d{int1} ± {int2}") )
+  my $hd = $main->{hd} // '?';
+
+  my $hp = $main->{hp}
+        //($hd eq '?'         ? '1d8'
+        :  $hd =~ /\A<\s*1\z/ ? '1d4'
+        :  $hd =~ $HD_RE      ? $1 . 'd8' . ($2 ? "$2$3" : '')
+        :                       '?'); # warn? -- rjbs, 2012-12-06
 
   my @also;
 
@@ -69,7 +77,7 @@ sub roll_table {
   my @units;
   if ($num ne '?') {
     UNIT: for (1 .. $num) {
-      my $unit = { hp => $self->hub->roll_dice($hd, "$name \#$_ hp") };
+      my $unit = { hp => max(1, $self->hub->roll_dice($hp, "$name \#$_ hp")) };
 
       for my $unit_extra (@{ $main->{'per-unit'} || [] }) {
         my $desc = $unit_extra->{label};
@@ -103,7 +111,8 @@ sub roll_table {
 
   my $result = Roland::Result::Monster->new(
     name  => $name,
-    hit_dice => $HD,
+    hit_dice => $hd,
+    hp_dice  => $main->{hp},
     damage   => $dmg,
     armor_class => $ac,
     movement    => $mv,
@@ -157,21 +166,13 @@ sub xp_for_monster {
   my $bonuses = @{ $monster->{'xp-bonuses'} // [] };
 
   return 0 unless my $hd = $monster->{hd};
-  my ($dice, $sign, $bonus) = split /\s+/, $hd, 3;
-  $bonus = ($sign || $bonus) ? "$sign$bonus" : 0;
 
-  if ($dice =~ /d/) {
-    my ($num, $type) = split /d/, $dice, 2;
-    die "confused about hit dice: $hd" if $type != 8 and $num != 1;
-    if ($type > 8) { $bonus = 1  };
-    if ($type < 8) { $bonus = -1 }
-    $dice = $num;
-  }
+  my $key = $hd eq '?'         ? return('?')
+          : $hd =~ /\A<\s*1\z/ ? '0.9'
+          : $hd =~ $HD_RE      ? $1 + ($2 ? ($2.'.1') : '')
+          :                      '?'; # warn? -- rjbs, 2012-12-06
 
-  my $d8 = $dice;
-  $d8 += $bonus > 0 ? .1 : $bonus < 0 ? -.1 : 0;
-
-  my $pair = $XP_LOOKUP->result_for($d8);
+  my $pair = $XP_LOOKUP->result_for($key);
   return($pair->[0] + $pair->[1] * $bonuses);
 }
 
