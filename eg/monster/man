@@ -12,3 +12,10 @@ loot: ~
 alignment: Lawful
 xp-bonuses:
 description: Just this guy, you know?
+per-unit:
+- label: Is Zombie?
+  dice: 1d100
+  results:
+    1: { replace: { file: [ eg/monster/zombie, { num: 1 } ] } }
+    2: Infected
+    3-100: No
