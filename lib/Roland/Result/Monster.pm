@@ -49,7 +49,7 @@ sub as_text {
 my $text = <<"END_MONSTER";
 
 $name
-  num: $num
+  No. Appearing: $num
   Hit Dice: $hd
   Stats: [ AC $ac, Mv $mv, Dmg $dmg ]
   Total XP: $xp_tot ($num x $xp_per xp)
