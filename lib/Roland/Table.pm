@@ -14,7 +14,6 @@ has hub => (
   weak_ref => 1,
   handles  => [ qw(
     roll_dice
-    roll_table_file
     build_and_roll_table
   ) ],
 );
@@ -60,7 +59,10 @@ sub append {
 }
 
 my %CMD_METHOD = (
-  file    => 'roll_table_file',
+  file    => sub {
+    my ($table, $file, @rest) = @_;
+    $table->hub->load_table_file($file)->roll_table(@rest);
+  },
   times   => 'roll_multi',
   replace => 'replace',
   append  => 'append',

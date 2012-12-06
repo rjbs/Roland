@@ -10,28 +10,30 @@ use Roland::Result::None;
 use Roland::Result::Simple;
 use Roland::Roller::Manual;
 use Roland::Roller::Random;
+use Roland::Table::Constant;
 use Roland::Table::Dictionary;
 use Roland::Table::List;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
 use YAML::XS ();
 
-sub roll_table_file {
-  my ($self, $fn, @rest) = @_;
+sub __error_table {
+  my ($self, $res, $error) = @_;
 
-  unless ($fn) {
-    return Roland::Result::Error->new({
-      resource => '?',
-      error    => "no filename given"
-    });
-  }
+  return Roland::Table::Constant->new({
+    hub    => $self,
+    result => Roland::Result::Error->new({
+      resource => $res,
+      error    => $error,
+    }),
+  });
+}
 
-  unless (-e $fn) {
-    return Roland::Result::Error->new({
-      resource => $fn,
-      error    => "file not found"
-    });
-  }
+sub load_table_file {
+  my ($self, $fn) = @_;
+
+  return $self->__error_table('?', "no filename given") unless $fn;
+  return $self->__error_table($fn, "file not found")    unless -e$fn;
 
   my $data = eval {
     my @data = YAML::XS::LoadFile($fn);
@@ -39,23 +41,12 @@ sub roll_table_file {
   };
   my $error = $@ || "(unknown error)";
 
-  unless ($data) {
-    return Roland::Result::Error->new({
-      resource => $fn,
-      error    => $error,
-    });
-  }
-
-  unless (@$data) {
-    return Roland::Result::Error->new({
-      resource => $fn,
-      error    => "file contained no documents",
-    });
-  }
+  return $self->__error_table($fn, $error) unless $data;
+  return $self->__error_table($fn, "file contained no documents") unless @$data;
 
   warn "ignoring documents after the first in $fn" if @$data > 1;
 
-  $self->build_and_roll_table( $fn, $data->[0], @rest );
+  $self->build_table($fn, $data->[0]);
 }
 
 sub _type_and_rest {
@@ -78,19 +69,25 @@ my %CLASS_FOR_TYPE = (
   dict    => 'Roland::Table::Dictionary',
 );
 
-sub build_and_roll_table {
-  my ($self, $name, $data, @rest) = @_;
+sub build_table {
+  my ($self, $name, $data) = @_;
 
   my ($type, $table) = $self->_type_and_rest($data);
 
   if (my $class = $CLASS_FOR_TYPE{ $type }) {
-    return $class->from_data($name, $table, $self)->roll_table(@rest);
+    return $class->from_data($name, $table, $self);
   }
 
-  Roland::Result::Error->new({
-    resource => $name || "table",
-    error    => "don't know how to handle table of type $type",
-  });
+  $self->__error_table(
+    $name || 'table',
+    "don't know how to handle table of type $type",
+  );
+}
+
+sub build_and_roll_table {
+  my ($self, $name, $data, @rest) = @_;
+
+  $self->build_table($name, $data)->roll_table(@rest);
 }
 
 has debug => (

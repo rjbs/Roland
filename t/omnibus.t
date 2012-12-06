@@ -19,7 +19,7 @@ sub test_result {
     }),
   });
 
-  my $result = $hub->roll_table_file($arg->{file});
+  my $result = $hub->load_table_file($arg->{file})->roll_table;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
 
   ok($hub->roller->rolls_exhausted, "used all the dice");
