@@ -1,0 +1,12 @@
+dice: 1d4
+times: 2
+results:
+  1: Robot
+  2: Hovering Squid
+  3:
+    dice: 1d4
+    times: 1d4
+    results:
+      1: Childhood friend
+      2-3: Kitten
+      4: Goblin
