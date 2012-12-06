@@ -111,8 +111,8 @@ has roller => (
   lazy => 1,
   handles => [ 'roll_dice' ],
   default => sub {
-    $_[0]->manual ? Roland::Roller::Manual->new({ hub => $_[0] })
-                  : Roland::Roller::Random->new({ hub => $_[0] })
+    $_[0]->manual ? Roland::Roller::Manual->new({ debug => $_[0]->debug })
+                  : Roland::Roller::Random->new({ debug => $_[0]->debug })
   },
 );
 

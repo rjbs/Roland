@@ -17,7 +17,7 @@ sub roll_dice {
   my @dice_str = split / \+ /, $dice;
   my $result = sum 0, map { Games::Dice::roll($_) } @dice_str;
 
-  say "rolled $dice for $label: $result" if $self->hub->debug;
+  say "rolled $dice for $label: $result" if $self->debug;
 
   return $result;
 }
