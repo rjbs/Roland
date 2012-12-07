@@ -1,0 +1,21 @@
+type: monster
+name: Elf
+ac: 6
+hd: 3
+mv: 180'
+attacks: 2
+damage: 2d6, 2d6
+num: 1d6
+save: M6
+morale: 9
+loot: ~
+alignment: Neutral
+xp-bonuses:
+  - Pointy ears
+description: Pointed ears, the whole thing.
+extras:
+- label: Robots?
+  dice: 1d100
+  results:
+    1: { replace: { file: eg/monster/roboelf } }
+    2-100: ~

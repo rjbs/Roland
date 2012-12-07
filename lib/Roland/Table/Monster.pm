@@ -31,6 +31,7 @@ sub roll_table {
 
   # TODO: barf about extra table entries?
   my $main = { %{ $self->_guts }, %$override };
+
   my $name = $main->{name} // "(unknown)";
   my $num_dice = $main->{num} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
@@ -38,21 +39,7 @@ sub roll_table {
           ? $self->hub->roll_dice($num_dice, "number of $name")
           : $num_dice;
 
-  # hd is hit dice; either "int1" or "int1 ± int2" or "< 1"
-  # hd is used for monster level, xp, etc
-  # hp is the hp generator; default based on hd
-  #   hd eq "< 1", 1d4
-  #   otherwise max(1, roll( "1d{int1} ± {int2}") )
-  my $hd = $main->{hd} // '?';
-
-  my $hp = $main->{hp}
-        //($hd eq '?'         ? '1d8'
-        :  $hd =~ /\A<\s*1\z/ ? '1d4'
-        :  $hd =~ $HD_RE      ? $1 . 'd8' . ($2 ? "$2$3" : '')
-        :                       '?'); # warn? -- rjbs, 2012-12-06
-
   my @also;
-
   my %extra;
   EXTRA: for my $extra (@{ $main->{extras} || [] }) {
     my $desc = $extra->{label};
@@ -73,6 +60,19 @@ sub roll_table {
 
     $extra{ $desc } = $result;
   }
+
+  # hd is hit dice; either "int1" or "int1 ± int2" or "< 1"
+  # hd is used for monster level, xp, etc
+  # hp is the hp generator; default based on hd
+  #   hd eq "< 1", 1d4
+  #   otherwise max(1, roll( "1d{int1} ± {int2}") )
+  my $hd = $main->{hd} // '?';
+
+  my $hp = $main->{hp}
+        //($hd eq '?'         ? '1d8'
+        :  $hd =~ /\A<\s*1\z/ ? '1d4'
+        :  $hd =~ $HD_RE      ? $1 . 'd8' . ($2 ? "$2$3" : '')
+        :                       '?'); # warn? -- rjbs, 2012-12-06
 
   my @units;
   if ($num ne '?') {

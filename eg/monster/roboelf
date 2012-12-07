@@ -1,0 +1,16 @@
+type: monster
+name: Robo-Elf
+ac: 2
+hd: 6
+mv: 180'
+attacks: 2
+damage: 2d8, 2d8
+num: 1d3
+save: M6
+morale: 10
+loot: ~
+alignment: Lawful
+xp-bonuses:
+  - Pointy ears
+  - Metal skin
+description: Built by OCP to replace traditional elfs.

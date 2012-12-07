@@ -56,7 +56,8 @@ $name
 END_MONSTER
 
   for my $key ($self->_extra_keys) {
-    next unless defined(my $v = $self->_get_extra($key));
+    my $v = $self->_get_extra($key);
+    next if $v->isa('Roland::Result::None');
     $v = $v->as_text;
     if ($indent * 2  +  length($v)  +  length($key)  +  4  >  79) {
       $v = autoformat $v, { left => 4, right => 79, all => 1 };
@@ -71,7 +72,7 @@ END_MONSTER
       my $hp = delete $unit->{hp};
       $text .= "- Hit points: $hp\n";
       for my $key (sort keys %$unit) {
-        next unless defined $unit->{$key};
+        next if $unit->{$key}->isa('Roland::Result::None');
         $text .= "  $key: " . $unit->{$key}->as_text . "\n";
       }
     } else {

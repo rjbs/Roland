@@ -37,4 +37,44 @@ test_result("monster/man, with zombies" => {
   },
 });
 
+test_result("elfs (meaty kind)" => {
+  file  => 'eg/monster/elf',
+  rolls => [
+    2,  # number appearing
+    29, # robots? no
+    12, # hit points
+    12, # hit points
+  ],
+  test  => sub {
+    my @results = flatten_multi($_[0]);
+    is(@results, 1, "we got just one encounter");
+
+    my @elfs    = $results[0]->units;
+
+    is(@elfs, 2, "...two units");
+    is($results[0]->name, 'Elf');
+    is($elfs[0]{hp}, 12, "... ...first with 12 hp");
+    is($elfs[1]{hp}, 12, "... ...second with 12 hp");
+  },
+});
+
+test_result("elfs (shiny kind)" => {
+  file  => 'eg/monster/elf',
+  rolls => [
+    4,  # number appearing (elfs)
+    1,  # robots? HECK YES!
+    1,  # number appearing (roboelfs)
+    20, # hit points
+  ],
+  test  => sub {
+    my @results = flatten_multi($_[0]);
+    is(@results, 1, "we got just one encounter");
+
+    my @roboelfs = $results[0]->units;
+
+    is(@roboelfs, 1, "...one unit, too");
+    is($roboelfs[0]{hp}, 20, "... with 20 hp");
+  },
+});
+
 done_testing;
