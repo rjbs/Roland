@@ -32,7 +32,7 @@ sub roll_table {
   # TODO: barf about extra table entries?
   my $main = { %{ $self->_guts }, %$override };
 
-  my $name = $main->{name} // "(unknown)";
+  my $name = $main->{name} // $self->name;
   my $num_dice = $main->{num} // '?';
   $num_dice = $num_dice->{wandering} if ref $num_dice;
   my $num = $num_dice =~ /d/
@@ -106,7 +106,7 @@ sub roll_table {
   my $mv  = $main->{mv}      // '?';
   my $dmg = $main->{Damage}        // '?';
 
-  my $xp   = $self->xp_for_monster($main) || '?';
+  my $xp   = $self->_xp_for_monster($main) || '?';
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
 
   my $result = Roland::Result::Monster->new(
@@ -161,7 +161,7 @@ my $XP_LOOKUP = Data::Bucketeer->new('>=' => {
   },
 });
 
-sub xp_for_monster {
+sub _xp_for_monster {
   my ($self, $monster) = @_;
   my $bonuses = @{ $monster->{'xp-bonuses'} // [] };
 
@@ -170,7 +170,7 @@ sub xp_for_monster {
   my $key = $hd eq '?'         ? return('?')
           : $hd =~ /\A<\s*1\z/ ? '0.9'
           : $hd =~ $HD_RE      ? $1 + ($2 ? ($2.'.1') : '0')
-          :                      '?'; # warn? -- rjbs, 2012-12-06
+          :                      return('?'); # warn? -- rjbs, 2012-12-06
 
   my $pair = $XP_LOOKUP->result_for($key);
   return($pair->[0] + $pair->[1] * $bonuses);
