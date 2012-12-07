@@ -64,6 +64,7 @@ test_result("elfs (shiny kind)" => {
     4,  # number appearing (elfs)
     1,  # robots? HECK YES!
     1,  # number appearing (roboelfs)
+    6,  # no monolith
     20, # hit points
   ],
   test  => sub {
@@ -74,6 +75,27 @@ test_result("elfs (shiny kind)" => {
 
     is(@roboelfs, 1, "...one unit, too");
     is($roboelfs[0]{hp}, 20, "... with 20 hp");
+  },
+});
+
+test_result("elfs (shiny kind (with big stone))" => {
+  file  => 'eg/monster/elf',
+  rolls => [
+    4,  # number appearing (elfs)
+    1,  # robots? HECK YES!
+    1,  # number appearing (roboelfs)
+    10, # monolith!
+    20, # hit points
+  ],
+  test  => sub {
+    my @results = flatten_multi($_[0]);
+    is(@results, 2, "we got a two-part encounter");
+
+    my @roboelfs = $results[0]->units;
+    is(@roboelfs, 1, "...one unit, too");
+    is($roboelfs[0]{hp}, 20, "... with 20 hp");
+
+    simple_ok($results[1], 'Monolith', 'second result')
   },
 });
 

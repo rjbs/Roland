@@ -14,3 +14,9 @@ xp-bonuses:
   - Pointy ears
   - Metal skin
 description: Built by OCP to replace traditional elfs.
+extras:
+  - label: Monolith?
+    dice: 1d10
+    results:
+      1-9: ~
+      10:  { append: Monolith }
