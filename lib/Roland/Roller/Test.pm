@@ -2,6 +2,7 @@ package Roland::Roller::Test;
 use Moose;
 with 'Roland::Roller';
 
+# on_exhaustion attr with coderef or presets: fatal, rand, recycle
 has planned_rolls => (
   isa => 'ArrayRef[Int]',
   traits  => [ 'Array' ],
