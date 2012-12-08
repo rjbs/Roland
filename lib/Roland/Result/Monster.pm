@@ -1,4 +1,5 @@
 package Roland::Result::Monster;
+# ABSTRACT: a monster encounter
 use Moose;
 with 'Roland::Result';
 

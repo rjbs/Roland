@@ -1,4 +1,5 @@
 package Roland::Redirect::Append;
+# ABSTRACT: a result that says "add this on, too"
 use Moose;
 use namespace::autoclean;
 

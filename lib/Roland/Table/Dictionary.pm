@@ -1,4 +1,5 @@
 package Roland::Table::Dictionary;
+# ABSTRACT: a table of ordered name/value pairs
 use Moose;
 with 'Roland::Table';
 

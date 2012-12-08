@@ -1,4 +1,5 @@
 package Roland::Redirect::Replace;
+# ABSTRACT: a result that says "replace the enclosing result"
 use Moose;
 use namespace::autoclean;
 

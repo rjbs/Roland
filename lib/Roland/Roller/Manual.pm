@@ -1,4 +1,5 @@
 package Roland::Roller::Manual;
+# ABSTRACT: let the DM roll and tell Roland what came up
 use Moose;
 with 'Roland::Roller';
 

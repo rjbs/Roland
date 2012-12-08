@@ -1,4 +1,6 @@
 #!/bin/env perl
+# PODNAME: roland
+# ABSTRACT: roll and print results
 use 5.12.0;
 use warnings;
 

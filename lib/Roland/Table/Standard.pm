@@ -1,4 +1,5 @@
 package Roland::Table::Standard;
+# ABSTACT: a table where you roll dice and look up a result
 use Moose;
 with 'Roland::Table';
 

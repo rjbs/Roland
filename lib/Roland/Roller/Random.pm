@@ -1,4 +1,5 @@
 package Roland::Roller::Random;
+# ABSTRACT: dice
 use Moose;
 with 'Roland::Roller';
 

@@ -1,4 +1,5 @@
 package Roland::Result::Simple;
+# ABSTRACT: a result that's just a string
 use Moose;
 with 'Roland::Result';
 
