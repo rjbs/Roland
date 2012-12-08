@@ -104,7 +104,7 @@ sub roll_table {
 
   my $ac  = $main->{ac} // '?';
   my $mv  = $main->{mv}      // '?';
-  my $dmg = $main->{Damage}        // '?';
+  my $dmg = $main->{damage}        // '?';
 
   my $xp   = $self->_xp_for_monster($main) || '?';
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
