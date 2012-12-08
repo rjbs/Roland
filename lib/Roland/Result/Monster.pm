@@ -46,6 +46,10 @@ sub as_text {
   my $xp_per = $self->xp_per_unit;
   my $xp_tot = $xp_per eq '?' ? '?' : $xp_per * $num;
 
+  $mv = '('
+      . (join ", ", map {; "$_: $mv->{$_}" } keys %$mv)
+      . ')' if ref $mv;
+
 my $text = <<"END_MONSTER";
 
 $name
