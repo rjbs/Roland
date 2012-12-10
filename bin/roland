@@ -21,4 +21,4 @@ my $hub = Roland::Hub->new({
 });
 
 say "rolling on $ARGV[0]" if $hub->debug;
-say $hub->load_table_file($ARGV[0])->roll_table->as_text;
+say $hub->load_table_file($ARGV[0])->roll_table->as_block_text;

@@ -8,7 +8,14 @@ use namespace::autoclean;
 has resource => (is => 'ro', isa => 'Str', required => 1);
 has error    => (is => 'ro', isa => 'Str', required => 1);
 
-sub as_text {
+sub inline_text_is_lossy { 0 }
+
+sub as_inline_text {
+  my ($self) = @_;
+  sprintf "(error with %s: %s)", $self->resource, $self->error;
+}
+
+sub as_block_text {
   my ($self, $indent) = @_;
 
   my $text = $self->error;

@@ -12,9 +12,4 @@ sub actual_result {
   return $result;
 }
 
-sub as_text {
-  my ($self) = @_;
-  return "REPLACE CONTAINER WITH:\n" . $self->actual_result->as_text;
-}
-
 1;

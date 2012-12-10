@@ -7,7 +7,13 @@ use namespace::autoclean;
 
 has text => (is => 'ro');
 
-sub as_text {
+sub inline_text_is_lossy { 0 }
+
+sub as_inline_text {
+  $_[0]->text;
+}
+
+sub as_block_text {
   my ($self, $indent) = @_;
 
   my $text = $self->text;

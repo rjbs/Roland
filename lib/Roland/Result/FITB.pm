@@ -10,7 +10,9 @@ use String::Formatter stringf => {
   string_replacer => 'named_replace',
 
   codes => {
-    s => sub { $_ },     # string itself
+    s => sub { $_ },
+    i => sub { $_->as_inline_text },
+    b => sub { $_->as_inline_text },
   },
 };
 
@@ -25,14 +27,23 @@ has template => (
   required => 1,
 );
 
-sub as_text {
+sub inline_text_is_lossy { 0 }
+
+# XXX: These as_X_text methods are a gross hack. -- rjbs, 2012-12-10
+sub as_inline_text {
   my ($self) = @_;
 
   my $dict = $self->dict;
-  my %text_dict = map {; $_ => $dict->result_for($_)->as_text }
-                  $dict->unordered_keys;
+  my %text_dict = map {; $_ => $dict->result_for($_) } $dict->unordered_keys;
 
-  return __stringf $self->template, \%text_dict;
+  my $str = __stringf $self->template, \%text_dict;
+  return $str;
+}
+
+sub as_block_text {
+  my ($self) = @_;
+
+  $self->as_inline_text . "\n";
 }
 
 1;

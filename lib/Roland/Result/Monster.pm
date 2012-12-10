@@ -32,7 +32,15 @@ has extras => (
   },
 );
 
-sub as_text {
+sub inline_text_is_lossy { 1 }
+
+sub as_inline_text {
+  my ($self) = @_;
+  my @units = $self->units;
+  sprintf '(%u x %s)', 0+@units, $self->name;
+}
+
+sub as_block_text {
   my ($self, $indent) = @_;
   $indent //= 0;
 
@@ -63,7 +71,7 @@ END_MONSTER
   for my $key ($self->_extra_keys) {
     my $v = $self->_get_extra($key);
     next if $v->isa('Roland::Result::None');
-    $v = $v->as_text;
+    $v = $v->as_block_text; # XXX: as_best_text
     if ($indent * 2  +  length($v)  +  length($key)  +  4  >  79) {
       $v = autoformat $v, { left => 4, right => 79, all => 1 };
       $text .= "  $key:\n$v";
@@ -78,7 +86,9 @@ END_MONSTER
       $text .= "- Hit points: $hp\n";
       for my $key (sort keys %$unit) {
         next if $unit->{$key}->isa('Roland::Result::None');
-        $text .= "  $key: " . $unit->{$key}->as_text . "\n";
+
+        # XXX: as_best_text
+        $text .= "  $key: " . $unit->{$key}->as_block_text . "\n";
       }
     } else {
       my $unit_text = $unit;

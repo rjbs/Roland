@@ -47,14 +47,19 @@ has ordered_keys => (
   },
 );
 
-sub as_text {
+sub inline_text_is_lossy { 1 }
+sub as_inline_text { '(table of results)' }
+
+sub as_block_text {
   my ($self, $indent) = @_;
   $indent //= 0;
 
   my $text = '';
 
   for my $slot ($self->_results) {
-    $text .= sprintf "%s: %s\n", $slot->[0], $slot->[1]->as_text($indent+1);
+    $text .= sprintf "%s: %s\n",
+      $slot->[0],
+      $slot->[1]->as_block_text($indent+1);
   }
 
   return $text;
