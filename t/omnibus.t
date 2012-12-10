@@ -69,12 +69,10 @@ test_result("L1, rolled 6,6" => {
   test   => sub {
     my $result = shift;
     isa_ok($result, 'Roland::Result::Dictionary', 'result for 6,6');
-    my @slots = $result->_results;
-    is($slots[0][0], 'Actually', "first label");
-    simple_ok($slots[0][1], 'Spy', 'first value');
-
-    is($slots[1][0], 'Cover', "second label");
-    simple_ok($slots[1][1], 'Cooper', 'second value');
+    my @slots = $result->ordered_keys;
+    is_deeply(\@slots, [ qw(Actually Cover) ], "the right ordered keys");
+    simple_ok($result->result_for('Actually') ,'Spy', 'first value');
+    simple_ok($result->result_for('Cover') ,'Cooper', 'second value');
   },
 });
 
