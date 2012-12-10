@@ -9,13 +9,18 @@ use Roland::Roller::Test;
 
 use Roland::Table::FITB;
 
-my $hub = Roland::Hub->new;
+my $hub = Roland::Hub->new({
+  roller => Roland::Roller::Test->new({
+    planned_rolls => [],
+    pick_n => sub { die "too many" unless $_[1] == 1; $_[2][-1] },
+  }),
+});
 
 my $table = Roland::Table::FITB->new({
   name    => 'FITB Test',
   hub     => $hub,
 
-  template  => 'The %{adj}s %{noun}s',
+  template  => 'The %{adj}i %{noun}i',
   _things   => {
     adj => {
       type  => 'list',
@@ -32,5 +37,10 @@ my $table = Roland::Table::FITB->new({
 
 my $result = $table->roll_table;
 
-ok 1;
+is(
+  $result->as_inline_text,
+  'The Wide Robot',
+  "we can fill in a tavern name",
+);
+
 done_testing;
