@@ -9,10 +9,6 @@ use namespace::autoclean;
 
 use Roland::Result::Dictionary;
 
-has _guts => (
-  is => 'ro',
-);
-
 has _things => (
   isa     => 'HashRef',
   traits  => [ 'Hash' ],
@@ -31,7 +27,7 @@ has key_order => (
   predicate => 'has_key_order',
 );
 
-sub from_data {
+sub _args_from_data {
   my ($class, $name, $data, $hub) = @_;
 
   my @slots = @{ $data->{entries} };
@@ -47,12 +43,18 @@ sub from_data {
     push @order, $key;
   }
 
-  return $class->new({
+  return {
     name  => $name,
     hub   => $hub,
     key_order => \@order,
     _things   => \%dict,
-  });
+  };
+}
+
+sub from_data {
+  my ($class, @rest) = @_;
+  my $args = $class->_args_from_data(@rest);
+  return $class->new($args);
 }
 
 sub roll_table {
@@ -66,7 +68,7 @@ sub roll_table {
   }
 
   return Roland::Result::Dictionary->new({
-    key_order => [ $self->key_order ],
+    ($self->has_key_order ? (key_order => [ $self->key_order ]) : ()),
     results   => \%result_for,
   });
 }
