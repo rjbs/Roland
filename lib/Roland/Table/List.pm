@@ -7,8 +7,17 @@ use namespace::autoclean;
 
 use Roland::Result::Multi;
 
-has _guts => (
-  is => 'ro',
+has pick_count => (
+  is  => 'ro',
+  isa => 'Int', # > 0 -- rjbs, 2012-12-09
+  predicate => 'has_pick_count',
+);
+
+has items => (
+  isa => 'ArrayRef',
+  traits  => [ 'Array' ],
+  handles => { items => 'elements' },
+  required => 1,
 );
 
 sub from_data {
@@ -16,20 +25,21 @@ sub from_data {
 
   return $class->new({
     name  => $name,
-    _guts => $data,
+    items => $data->{items},
     hub   => $hub,
+    (defined $data->{pick} ? (pick_count => $data->{pick}) : ()),
   });
 }
 
 sub roll_table {
   my ($self) = @_;
 
-  my @list = @{ $self->_guts->{items} };
+  my @list = $self->items;
 
   my @keys = (0 .. $#list);
 
-  if (defined $self->_guts->{pick}) {
-    @keys = $self->hub->roller->pick_n($self->_guts->{pick}, \@keys);
+  if ($self->has_pick_count) {
+    @keys = $self->hub->roller->pick_n($self->pick_count, \@keys);
   }
 
   my @group;
