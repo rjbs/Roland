@@ -39,7 +39,7 @@ sub roll_table {
   my @keys = (0 .. $#list);
 
   if ($self->has_pick_count) {
-    @keys = $self->hub->roller->pick_n($self->pick_count, \@keys);
+    @keys = $self->hub->roller->pick_n($self->pick_count, $#list);
   }
 
   my @group;

@@ -56,10 +56,10 @@ sub as_block_text {
 
   my $text = '';
 
-  for my $slot ($self->_results) {
+  for my $key ($self->ordered_keys) {
     $text .= sprintf "%s: %s\n",
-      $slot->[0],
-      $slot->[1]->as_block_text($indent+1);
+      $key,
+      $self->result_for($key)->as_block_text;
   }
 
   return $text;

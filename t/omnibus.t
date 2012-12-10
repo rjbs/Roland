@@ -16,7 +16,7 @@ test_result("L1, rolled a 2" => {
 test_result("L1, rolled a 3" => {
   file   => 'eg/dungeon/encounters-L1',
   rolls  => [ 3 ],
-  pick_n => sub { $_[2][0] },
+  pick_n => sub { 0 },
   test   => sub { simple_ok($_, 'Cat', 'result for 3 [0]') },
 });
 
@@ -34,7 +34,7 @@ test_result("L1, rolled a 5" => {
   file   => 'eg/dungeon/encounters-L1',
   rolls  => [ 5 ],
   rand   => 1,
-  pick_n => sub { $_[2][1] },
+  pick_n => sub { 1 },
   test   => sub {
     my $result = shift;
     isa_ok($result, 'Roland::Result::Multi');
@@ -65,7 +65,7 @@ test_result("L1, rolled 6,3" => {
 test_result("L1, rolled 6,6" => {
   file   => 'eg/dungeon/encounters-L1',
   rolls  => [ 6, 6 ],
-  pick_n => sub { $_[2][2] },
+  pick_n => sub { 2 },
   test   => sub {
     my $result = shift;
     isa_ok($result, 'Roland::Result::Dictionary', 'result for 6,6');

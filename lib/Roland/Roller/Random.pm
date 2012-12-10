@@ -24,9 +24,9 @@ sub roll_dice {
 }
 
 sub pick_n {
-  my ($self, $n, $items) = @_;
+  my ($self, $n, $max) = @_;
 
-  my @shuffled_items = shuffle @$items;
+  my @shuffled_items = shuffle(0 .. $max);
   splice @shuffled_items, $n;
   return @shuffled_items;
 }

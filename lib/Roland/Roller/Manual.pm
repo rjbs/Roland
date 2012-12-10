@@ -29,8 +29,12 @@ sub roll_dice {
 }
 
 sub pick_n {
-  warn "Manual roller does not implement pick_n yet, using Random\n";
-  goto &Roland::Roller::Random::pick_n;
+  my ($self, $n, $max) = @_;
+  local $| = 1;
+  print "enter $n integer(s) in (0..$max): ";
+  my $result = <STDIN>;
+  chomp $result;
+  split /\s+/, $result;
 }
 
 1;

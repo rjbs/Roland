@@ -15,8 +15,8 @@ sub test_result {
       random_fallback => $arg->{rand},
       planned_rolls   => $arg->{rolls},
       pick_n          => $arg->{pick_n} || sub {
-        my ($self, $n, $aref) = @_;
-        (@$aref)[0 .. $n - 1];
+        my ($self, $n, $max) = @_;
+        return( (0 .. $n) );
       },
     }),
   });

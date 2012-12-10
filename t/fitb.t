@@ -12,7 +12,7 @@ use Roland::Table::FITB;
 my $hub = Roland::Hub->new({
   roller => Roland::Roller::Test->new({
     planned_rolls => [],
-    pick_n => sub { die "too many" unless $_[1] == 1; $_[2][-1] },
+    pick_n => sub { die "too many" unless $_[1] == 1; $_[2] },
   }),
 });
 

@@ -38,7 +38,11 @@ sub roll_table {
   $key = $key->as_inline_text
     if bless $key and $key->does('Roland::Result');
 
-  ($key) //= $self->hub->roller->pick_n([ $self->lookup_keys ]);
+  unless (defined $key) {
+    my @keys = $self->lookup_keys;
+    my ($i) = $self->hub->roller->pick_n(1, $#keys);
+    $key = $keys[$i];
+  }
 
   return $self->_result_for_line( $self->result_for($key) , $key);
 }
