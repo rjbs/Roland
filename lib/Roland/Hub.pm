@@ -62,13 +62,21 @@ sub _type_and_rest {
   return;
 }
 
-# Make this a registry -- rjbs, 2012-12-03
-my %CLASS_FOR_TYPE = (
-  monster => 'Roland::Table::Monster',
-  list    => 'Roland::Table::List',
-  table   => 'Roland::Table::Standard',
-  dict    => 'Roland::Table::Dictionary',
+has type_registry => (
+  isa     => 'HashRef',
+  traits  => [ 'Hash' ],
+  builder => 'build_type_registry',
+  handles => { class_for_type => 'get' },
 );
+
+sub build_type_registry {
+  return {
+    monster => 'Roland::Table::Monster',
+    list    => 'Roland::Table::List',
+    table   => 'Roland::Table::Standard',
+    dict    => 'Roland::Table::Dictionary',
+  }
+}
 
 sub build_table {
   my ($self, $name, $data) = @_;
@@ -76,7 +84,7 @@ sub build_table {
   return $self->__error_table($name => "no idea what to do with input $data")
     unless my ($type, $table) = $self->_type_and_rest($data);
 
-  if (my $class = $CLASS_FOR_TYPE{ $type }) {
+  if (my $class = $self->class_for_type($type)) {
     return $class->from_data($name, $table, $self);
   }
 
