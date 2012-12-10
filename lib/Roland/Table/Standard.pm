@@ -8,7 +8,15 @@ use Roland::Result::Multi;
 
 use namespace::autoclean;
 
-has _guts => (
+has times => (
+  is => 'ro',
+);
+
+has dice => (
+  is => 'ro',
+);
+
+has results => ( # XXX: bad name -- rjbs, 2012-12-09
   is => 'ro',
 );
 
@@ -17,7 +25,11 @@ sub from_data {
 
   return $class->new({
     name  => $name,
-    _guts => $data,
+
+    times   => $data->{times} // 1,
+    dice    => $data->{dice},
+    results => $data->{results}, # rename?
+
     hub   => $hub,
   });
 }
@@ -25,15 +37,14 @@ sub from_data {
 sub roll_table {
   my ($self) = @_;
   my $name = $self->name;
-  my $table = $self->_guts;
 
   my @results;
   for my $i (
-    1 .. $self->hub->roll_dice($table->{times} // 1, "times to roll on $name")
+    1 .. $self->hub->roll_dice($self->times // 1, "times to roll on $name")
   ) {
-    my %results = %{ $table->{results} };
+    my %results = %{ $self->results };
 
-    my $total = $self->hub->roll_dice($table->{dice}, $name);
+    my $total = $self->hub->roll_dice($self->dice, $name);
 
     my %case;
     for my $key (keys %results) {
