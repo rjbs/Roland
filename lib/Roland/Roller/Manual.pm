@@ -30,10 +30,12 @@ sub roll_dice {
 
 sub pick_n {
   my ($self, $n, $max) = @_;
+  my @default = Roland::Roller::Random->new->pick_n($n, $max);
   local $| = 1;
-  print "enter $n integer(s) in (0..$max): ";
+  print "enter $n integer(s) in (0..$max) [@default]: ";
   my $result = <STDIN>;
   chomp $result;
+  return @default unless $result =~ /\S/;
   split /\s+/, $result;
 }
 
