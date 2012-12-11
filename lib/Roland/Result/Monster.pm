@@ -9,6 +9,7 @@ use Data::Bucketeer;
 use Text::Autoformat;
 
 has name  => (is => 'ro');
+has where => (is => 'ro');
 has hit_dice => (is => 'ro');
 has damage   => (is => 'ro');
 has armor_class => (is => 'ro');
@@ -44,11 +45,12 @@ sub as_block_text {
   my ($self, $indent) = @_;
   $indent //= 0;
 
-  my $name = $self->name;
-  my $hd   = $self->hit_dice;
-  my $ac   = $self->armor_class;
-  my $mv   = $self->movement;
-  my $dmg  = $self->damage;
+  my $name  = $self->name;
+  my $where = $self->where;
+  my $hd    = $self->hit_dice;
+  my $ac    = $self->armor_class;
+  my $mv    = $self->movement;
+  my $dmg   = $self->damage;
 
   my @units  = $self->units;
   my $num    = @units;
@@ -61,7 +63,7 @@ sub as_block_text {
 
 my $text = <<"END_MONSTER";
 
-$name
+$name ($where)
   No. Appearing: $num
   Hit Dice: $hd
   Stats: [ AC $ac, Mv $mv, Dmg $dmg ]

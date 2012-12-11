@@ -31,11 +31,23 @@ sub roll_table {
   $override //= {};
 
   # TODO: barf about extra table entries?
-  my $main = { %{ $self->_guts }, %$override };
+  my $main = {
+    name => $self->name,
+    num  => '?',
+    where => 'wandering',
 
-  my $name = $main->{name} // $self->name;
-  my $num_dice = $main->{num} // '?';
-  $num_dice = $num_dice->{wandering} if ref $num_dice;
+    %{ $self->_guts },
+    %$override
+  };
+
+  my $name = $main->{name};
+  my $num_dice = $main->{num};
+  if (ref $num_dice) {
+    $num_dice = $num_dice->{ $main->{where} }
+             // $num_dice->{wandering}
+             // (values %$num_dice)[0]
+  }
+
   my $num = $num_dice =~ /d/
           ? $self->hub->roll_dice($num_dice, "number of $name")
           : $num_dice;
@@ -111,7 +123,8 @@ sub roll_table {
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
 
   my $result = Roland::Result::Monster->new(
-    name  => $name,
+    name     => $name,
+    where    => $main->{where},
     hit_dice => $hd,
     hp_dice  => $main->{hp},
     damage   => $dmg,
