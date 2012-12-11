@@ -8,6 +8,7 @@ use 5.16.0;
 use namespace::autoclean;
 
 use Roland::Result::Dictionary;
+use Sort::ByExample;
 
 has _things => (
   isa     => 'HashRef',
@@ -51,6 +52,28 @@ sub _args_from_data {
   };
 }
 
+# XXX: C&P between here and Result::Dict -- rjbs, 2012-12-11
+has ordered_keys => (
+  isa     => 'ArrayRef',
+  traits  => [ 'Array' ],
+  handles => {
+    ordered_keys => 'elements',
+  },
+  init_arg => undef,
+  lazy     => 1,
+  default  => sub {
+    my ($self) = @_;
+    return [ $self->unordered_keys ] unless $self->has_key_order;
+
+    my @results = Sort::ByExample->sorter(
+      [ $self->key_order ],
+      sub { fc $_[0] cmp fc $_[1] },
+    )->($self->unordered_keys);
+
+    return \@results;
+  },
+);
+
 sub from_data {
   my ($class, @rest) = @_;
   my $args = $class->_args_from_data(@rest);
@@ -61,7 +84,7 @@ sub roll_table {
   my ($self) = @_;
 
   my %result_for;
-  for my $key ($self->unordered_keys) {
+  for my $key ($self->ordered_keys) {
     my $line = $self->_thing_for($key);
 
     $result_for{$key} = $self->_result_for_line($line, $key);
