@@ -71,7 +71,8 @@ sub roll_table {
         return $error->actual_result;
       }
       if (eval { $error->isa('Roland::Redirect::Append') }) {
-        push @also, $error->actual_result;
+        push @also, $error->actual_result
+          unless $error->actual_result->isa('Roland::Result::None');
         next EXTRA;
       }
       die $error;
