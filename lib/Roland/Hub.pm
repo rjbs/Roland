@@ -14,6 +14,7 @@ use Roland::Roller::Random;
 use Roland::Table::Constant;
 use Roland::Table::Dictionary;
 use Roland::Table::List;
+use Roland::Table::Lookup;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
 use YAML::XS ();
@@ -73,6 +74,7 @@ sub build_type_registry {
   return {
     monster => 'Roland::Table::Monster',
     list    => 'Roland::Table::List',
+    lookup  => 'Roland::Table::Lookup',
     table   => 'Roland::Table::Standard',
     dict    => 'Roland::Table::Dictionary',
   }

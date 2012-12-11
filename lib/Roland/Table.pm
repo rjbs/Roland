@@ -80,7 +80,7 @@ sub subtable_name {
 }
 
 sub _result_for_line {
-  my ($self, $payload, $name) = @_;
+  my ($self, $payload, $name, $arg) = @_;
 
   my $line_name = $self->subtable_name($name);
 
@@ -102,7 +102,7 @@ sub _result_for_line {
     return $self->$method(@args);
   }
 
-  return $self->build_and_roll_table($line_name, $payload);
+  return $self->build_and_roll_table($line_name, $payload, $arg);
 }
 
 requires 'roll_table';

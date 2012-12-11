@@ -5,7 +5,13 @@ hd: 6
 mv: 180'
 attacks: 2
 damage: 2d8, 2d8
-num: 1d3
+num:
+  type: lookup
+  key: where
+  default: wandering
+  lookup:
+    wandering: 1d3
+    lair: 3d6
 save: M6
 morale: 10
 loot: ~

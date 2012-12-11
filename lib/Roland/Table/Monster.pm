@@ -41,12 +41,12 @@ sub roll_table {
   };
 
   my $name = $main->{name};
-  my $num_dice = $main->{num};
-  if (ref $num_dice) {
-    $num_dice = $num_dice->{ $main->{where} }
-             // $num_dice->{wandering}
-             // (values %$num_dice)[0]
-  }
+
+  my $num_dice = $self->_result_for_line(
+    $main->{num},
+    "number appearing",
+    $main,
+  )->as_inline_text;
 
   my $num = $num_dice =~ /d/
           ? $self->hub->roll_dice($num_dice, "number of $name")
