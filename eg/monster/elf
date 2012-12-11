@@ -14,8 +14,8 @@ xp-bonuses:
   - Pointy ears
 description: Pointed ears, the whole thing.
 extras:
-- label: Robots?
-  dice: 1d100
-  results:
-    1: { replace: { file: eg/monster/roboelf } }
-    2-100: ~
+  Robots?:
+    dice: 1d100
+    results:
+      1: { replace: { file: eg/monster/roboelf } }
+      2-100: ~

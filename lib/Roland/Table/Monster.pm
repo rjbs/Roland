@@ -54,10 +54,16 @@ sub roll_table {
 
   my @also;
   my %extra;
-  EXTRA: for my $extra (@{ $main->{extras} || [] }) {
-    my $desc = $extra->{label};
+  EXTRA: for my $extra_key (sort keys %{ $main->{extras} || {} }) {
+    my $desc = $extra_key;
 
-    my $result = eval { $self->build_and_roll_table("extra::$desc", $extra); };
+    my $result = eval {
+      $self->_result_for_line(
+        $main->{extras}{$extra_key},
+        "extra::$desc",
+        $main,
+      );
+    };
 
     unless ($result) {
       my $error = $@;

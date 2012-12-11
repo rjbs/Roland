@@ -21,7 +21,7 @@ xp-bonuses:
   - Metal skin
 description: Built by OCP to replace traditional elfs.
 extras:
-  - label: Monolith?
+  Monolith?:
     dice: 1d10
     results:
       1-9: ~
