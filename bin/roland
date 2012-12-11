@@ -11,8 +11,9 @@ use Roland::Hub;
 
 my ($opt, $usage) = describe_options(
   '%c %o <table>',
-  [ 'manual|m', 'enter die rolls manually' ],
-  [ 'debug|d',  'show all die rolling activity' ],
+  [ 'manual|m',     'enter die rolls manually' ],
+  [ 'debug|d',      'show all die rolling activity' ],
+  [ 'options|o=s%', 'options to pass to the table' ],
 );
 
 my $hub = Roland::Hub->new({
@@ -21,4 +22,4 @@ my $hub = Roland::Hub->new({
 });
 
 say "rolling on $ARGV[0]" if $hub->debug;
-say $hub->load_table_file($ARGV[0])->roll_table->as_block_text;
+say $hub->load_table_file($ARGV[0])->roll_table($opt->options)->as_block_text;
