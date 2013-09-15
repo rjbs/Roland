@@ -1,0 +1,9 @@
+---
+type: queue
+items:
+  - Foo
+  - Bar
+  - Baz
+  - { file: eg/plan }
+  - { file: eg/plan }
+  - Quux

@@ -133,4 +133,45 @@ test_result("L3, rolled an 1,3,3,4,3,1" => {
   },
 });
 
+{
+  my $hub = Roland::Hub->new;
+
+  my $table = $hub->load_table_file('eg/queue');
+
+  my @results = map { $table->roll_table->as_inline_text } (1 .. 10);
+
+  is_deeply(
+    \@results,
+    [
+      'Foo',
+      'Bar',
+      'Baz',
+      ('collect underpants, ?, profit') x 2,
+      ('Quux') x 5,
+    ],
+    "the queue behaves as expected",
+  );
+}
+
+{
+  local $TODO = "should be able to refer to a queue from another table";
+  my $hub = Roland::Hub->new;
+
+  my $table = $hub->load_table_file('eg/queue-list');
+
+  my @results = map { $table->roll_table->as_inline_text } (1 .. 10);
+
+  is_deeply(
+    \@results,
+    [
+      'Foo',
+      'Bar',
+      'Baz',
+      ('collect underpants, ?, profit') x 2,
+      ('Quux') x 5,
+    ],
+    "a queue embedded in another table behaves as expected",
+  );
+}
+
 done_testing;

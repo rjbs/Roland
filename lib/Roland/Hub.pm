@@ -15,6 +15,7 @@ use Roland::Table::Constant;
 use Roland::Table::Dictionary;
 use Roland::Table::List;
 use Roland::Table::Lookup;
+use Roland::Table::Queue;
 use Roland::Table::Monster;
 use Roland::Table::Standard;
 use YAML::XS ();
@@ -72,11 +73,12 @@ has type_registry => (
 
 sub build_type_registry {
   return {
-    monster => 'Roland::Table::Monster',
+    dict    => 'Roland::Table::Dictionary',
     list    => 'Roland::Table::List',
     lookup  => 'Roland::Table::Lookup',
+    queue   => 'Roland::Table::Queue',
+    monster => 'Roland::Table::Monster',
     table   => 'Roland::Table::Standard',
-    dict    => 'Roland::Table::Dictionary',
   }
 }
 
