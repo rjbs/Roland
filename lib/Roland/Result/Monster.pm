@@ -12,6 +12,9 @@ has name  => (is => 'ro');
 has where => (is => 'ro');
 has hit_dice => (is => 'ro');
 has damage   => (is => 'ro');
+has attacks  => (is => 'ro');
+has thac0    => (is => 'ro');
+has saves    => (is => 'ro');
 has armor_class => (is => 'ro');
 has movement    => (is => 'ro');
 has xp_per_unit => (is => 'ro');
@@ -51,6 +54,8 @@ sub as_block_text {
   my $ac    = $self->armor_class;
   my $mv    = $self->movement;
   my $dmg   = $self->damage;
+  my $atk   = $self->attacks;
+  my $thac0 = $self->thac0;
 
   my @units  = $self->units;
   my $num    = @units;
@@ -61,12 +66,19 @@ sub as_block_text {
       . (join ", ", map {; "$_: $mv->{$_}" } keys %$mv)
       . ')' if ref $mv;
 
+  my @save  = @{ $self->saves };
+  my @label = qw(poison wand petrify breath spell);
+  my $saves = join q{, },
+              map {; join q{: }, $label[$_], $save[$_] } (keys @label);
+
 my $text = <<"END_MONSTER";
 
 $name ($where)
   No. Appearing: $num
   Hit Dice: $hd
-  Stats: [ AC $ac, Mv $mv, Dmg $dmg ]
+  Stats: [ AC $ac, Mv $mv, THAC0 $thac0, Dmg $dmg ]
+  Attacks: $atk
+  Saves  : $saves
   Total XP: $xp_tot ($num x $xp_per xp)
 END_MONSTER
 
