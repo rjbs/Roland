@@ -13,11 +13,11 @@ has where => (is => 'ro');
 has hit_dice => (is => 'ro');
 has damage   => (is => 'ro');
 has attacks  => (is => 'ro');
-has thac0    => (is => 'ro');
 has saves    => (is => 'ro');
 has armor_class => (is => 'ro');
 has movement    => (is => 'ro');
 has xp_per_unit => (is => 'ro');
+has attack_bonus => (is => 'ro');
 
 has units => (
   isa => 'ArrayRef',
@@ -55,7 +55,7 @@ sub as_block_text {
   my $mv    = $self->movement;
   my $dmg   = $self->damage;
   my $atk   = $self->attacks;
-  my $thac0 = $self->thac0;
+  my $attack_bonus = sprintf '%+d', $self->attack_bonus;
 
   my @units  = $self->units;
   my $num    = @units;
@@ -76,7 +76,7 @@ my $text = <<"END_MONSTER";
 $name ($where)
   No. Appearing: $num
   Hit Dice: $hd
-  Stats: [ AC $ac, Mv $mv, THAC0 $thac0, Dmg $dmg ]
+  Stats: [ AC $ac, Mv $mv, Atk $attack_bonus, Dmg $dmg ]
   Attacks: $atk
   Saves  : $saves
   Total XP: $xp_tot ($num x $xp_per xp)

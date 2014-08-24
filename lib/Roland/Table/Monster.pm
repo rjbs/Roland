@@ -130,7 +130,7 @@ sub roll_table {
   my $xp   = $self->_xp_for_monster($main) || '?';
   my $xp_t = $xp eq '?' ? '?' : $num * $xp;
 
-  my $thac0 = $self->_thac0_for_monster($main) || '?';
+  my $attack_bonus = $self->_attack_bonus_for_monster($main) || '?';
 
   my $result = Roland::Result::Monster->new(
     name     => $name,
@@ -139,11 +139,11 @@ sub roll_table {
     hp_dice  => $main->{hp},
     damage   => $dmg,
     attacks  => $atk,
-    thac0    => $thac0,
     armor_class => $ac,
     movement    => $mv,
     xp_per_unit => $xp,
     saves       => $main->{saves} // [ $self->_saves_for_monster($main) ],
+    attack_bonus => $attack_bonus,
 
     extras => \%extra,
     units  => \@units,
@@ -159,38 +159,38 @@ sub roll_table {
 }
 
 my $LOOKUP = Data::Bucketeer->new('>=' => {
-               # BASE XP | BONUS XP | THAC0
-   0.9 => sub { [    5,           1,     19 ] },
-   1.0 => sub { [   10,           1,     19 ] },
-   1.1 => sub { [   15,           1,     18 ] },
-   2.0 => sub { [   20,           5,     18 ] },
-   2.1 => sub { [   25,          10,     17 ] },
-   3.0 => sub { [   50,          15,     17 ] },
-   3.1 => sub { [   50,          25,     16 ] },
-   4.0 => sub { [   75,          50,     16 ] },
-   4.1 => sub { [  125,          75,     15 ] },
-   5.0 => sub { [  175,         125,     15 ] },
-   5.1 => sub { [  225,         175,     14 ] },
-   6.0 => sub { [  350,         225,     14 ] },
-   6.1 => sub { [  350,         300,     13 ] },
-   7.0 => sub { [  450,         400,     13 ] },
-   7.1 => sub { [  450,         400,     12 ] },
-   8.0 => sub { [  650,         550,     12 ] },
-   9.0 => sub { [  900,         700,     12 ] },
-   9.1 => sub { [  900,         700,     11 ] },
-  11   => sub { [ 1100,         800,     11 ] },
-  11.1 => sub { [ 1100,         800,     10 ] },
-  13   => sub { [ 1350,         950,     10 ] },
-  13.1 => sub { [ 1350,         950,      9 ] },
-  15.1 => sub { [ 1350,         950,      8 ] },
-  17   => sub { [ 2000,        1150,      7 ] },
+               # BASE XP | BONUS XP | ATTACK
+   0.9 => sub { [    5,           1,     +1 ] },
+   1.0 => sub { [   10,           1,     +1 ] },
+   1.1 => sub { [   15,           1,     +2 ] },
+   2.0 => sub { [   20,           5,     +2 ] },
+   2.1 => sub { [   25,          10,     +3 ] },
+   3.0 => sub { [   50,          15,     +3 ] },
+   3.1 => sub { [   50,          25,     +4 ] },
+   4.0 => sub { [   75,          50,     +4 ] },
+   4.1 => sub { [  125,          75,     +5 ] },
+   5.0 => sub { [  175,         125,     +5 ] },
+   5.1 => sub { [  225,         175,     +6 ] },
+   6.0 => sub { [  350,         225,     +6 ] },
+   6.1 => sub { [  350,         300,     +7 ] },
+   7.0 => sub { [  450,         400,     +7 ] },
+   7.1 => sub { [  450,         400,     +8 ] },
+   8.0 => sub { [  650,         550,     +8 ] },
+   9.0 => sub { [  900,         700,     +8 ] },
+   9.1 => sub { [  900,         700,     +9 ] },
+  11   => sub { [ 1100,         800,     +9 ] },
+  11.1 => sub { [ 1100,         800,    +10 ] },
+  13   => sub { [ 1350,         950,    +10 ] },
+  13.1 => sub { [ 1350,         950,    +11 ] },
+  15.1 => sub { [ 1350,         950,    +12 ] },
+  17   => sub { [ 2000,        1150,    +13 ] },
   21   => sub {
     my $hd   = int $_;
     my $over = $hd - 21;
     return [
       2500 + 250 * $over,
       2000,
-      7,
+      +13,
     ];
   },
 });
@@ -218,7 +218,7 @@ sub _xp_for_monster {
   return($pair->[0] + $pair->[1] * $bonuses);
 }
 
-sub _thac0_for_monster {
+sub _attack_bonus_for_monster {
   my ($self, $monster) = @_;
 
   return 20 unless my $hd = $monster->{hd};
