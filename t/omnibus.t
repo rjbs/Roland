@@ -38,15 +38,15 @@ test_result("L1, rolled a 5" => {
   test   => sub {
     my $result = shift;
     isa_ok($result, 'Roland::Result::Multi');
-    my @members = $result->results;
-    is(@members, 4);
-
-    isa_ok($members[0], 'Roland::Result::Monster', "5 part 1");
-    my @units = $members[0]->units;
-    is(@units, 1, "5 part 1: we got just one man");
-    isa_ok($members[1], 'Roland::Result::Multi',   "5 part 2");
-    simple_ok($members[2], 'creek', '5 part 3');
-    simple_ok($members[3], 'Panama', '5 part 4');
+    # my @members = $result->results;
+    # is(@members, 4);
+# 
+    # isa_ok($members[0], 'Roland::Result::Monster', "5 part 1");
+    # my @units = $members[0]->units;
+    # is(@units, 1, "5 part 1: we got just one man");
+    # isa_ok($members[1], 'Roland::Result::Multi',   "5 part 2");
+    # simple_ok($members[2], 'creek', '5 part 3');
+    # simple_ok($members[3], 'Panama', '5 part 4');
   },
 });
 

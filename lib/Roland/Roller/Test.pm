@@ -43,7 +43,7 @@ sub next_roll {
   my $next = $self->_next_roll;
   return $next if defined $next;
   return undef if $self->random_fallback;
-  Carp::croak( "tried to get a roll when exhausted" );
+  Carp::confess( "tried to get a roll when exhausted" );
 }
 
 sub roll_dice {

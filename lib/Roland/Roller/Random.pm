@@ -26,6 +26,8 @@ sub roll_dice {
 sub pick_n {
   my ($self, $n, $max) = @_;
 
+  Carp::cluck("picking $n from a $max size set") if $n > $max;
+
   my @shuffled_items = shuffle(0 .. $max);
   splice @shuffled_items, $n;
   return @shuffled_items;

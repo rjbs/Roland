@@ -10,25 +10,28 @@ use Sub::Exporter -setup => {
 
 sub test_result {
   my ($description, $arg) = @_;
-  my $hub = Roland::Hub->new({
-    roller => Roland::Roller::Test->new({
-      random_fallback => $arg->{rand},
-      planned_rolls   => $arg->{rolls},
-      pick_n          => $arg->{pick_n} || sub {
-        my ($self, $n, $max) = @_;
-        return( (0 .. $n) );
-      },
-    }),
-  });
 
-  my $result = $hub->load_table_file($arg->{file})->roll_table;
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
+  subtest $description => sub {
+    my $hub = Roland::Hub->new({
+      roller => Roland::Roller::Test->new({
+        random_fallback => $arg->{rand},
+        planned_rolls   => $arg->{rolls},
+        pick_n          => $arg->{pick_n} || sub {
+          my ($self, $n, $max) = @_;
+          return( (0 .. $n) );
+        },
+      }),
+    });
 
-  ok($hub->roller->rolls_exhausted, "used all the dice");
+    my $result = $hub->load_table_file($arg->{file})->roll_table;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-  local $Test::Builder::Level = $Test::Builder::Level + 1;
-  local $_ = $result;
-  $arg->{test}->($result);
+    ok($hub->roller->rolls_exhausted, "used all the dice");
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    local $_ = $result;
+    $arg->{test}->($result);
+  }
 }
 
 sub simple_ok {
