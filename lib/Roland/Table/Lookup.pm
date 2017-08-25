@@ -1,4 +1,5 @@
 package Roland::Table::Lookup;
+
 use Moose;
 
 with 'Roland::Table';

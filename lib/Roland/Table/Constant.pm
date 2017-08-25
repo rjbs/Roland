@@ -1,5 +1,7 @@
 package Roland::Table::Constant;
+
 # ABSTRACT: a table with only one result
+
 use Moose;
 with 'Roland::Table';
 

@@ -1,5 +1,7 @@
 package Roland::Result::Dictionary;
+
 # ABSTRACT: a set of ordered name/value results
+
 use Moose;
 with 'Roland::Result';
 

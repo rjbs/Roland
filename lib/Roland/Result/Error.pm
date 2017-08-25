@@ -1,5 +1,7 @@
 package Roland::Result::Error;
+
 # ABSTRACT: something went wrong
+
 use Moose;
 with 'Roland::Result';
 

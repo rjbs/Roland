@@ -1,5 +1,7 @@
 package Roland::Table::Queue;
+
 # ABSTRACT: a queue of results to get in order
+
 use Moose;
 with 'Roland::Table';
 
