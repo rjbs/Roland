@@ -1,4 +1,5 @@
 package Roland::Table::FITB;
+
 use Moose;
 extends 'Roland::Table::Dictionary';
 

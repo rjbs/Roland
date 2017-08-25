@@ -1,5 +1,7 @@
 package Roland::Table::Monster;
+
 # ABSTRACT: a table to generate a monster encounter
+
 use Moose;
 with 'Roland::Table';
 

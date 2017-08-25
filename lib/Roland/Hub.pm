@@ -1,6 +1,8 @@
 #!/bin/env perl
 package Roland::Hub;
+
 # ABSTRACT: the hub of rolly activity
+
 use Moose;
 use 5.12.0;
 

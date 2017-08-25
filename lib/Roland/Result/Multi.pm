@@ -1,5 +1,7 @@
 package Roland::Result::Multi;
+
 # ABSTRACT: a bunch of results
+
 use Moose;
 with 'Roland::Result';
 

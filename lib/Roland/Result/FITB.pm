@@ -1,4 +1,5 @@
 package Roland::Result::FITB;
+
 use Moose;
 with 'Roland::Result';
 

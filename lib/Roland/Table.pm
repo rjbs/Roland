@@ -1,5 +1,7 @@
 package Roland::Table;
+
 # ABSTRACT: a table; you roll on it
+
 use Moose::Role;
 use 5.12.0;
 

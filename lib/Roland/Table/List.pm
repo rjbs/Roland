@@ -1,5 +1,7 @@
 package Roland::Table::List;
+
 # ABSTRACT: a table listing unweighted results
+
 use Moose;
 with 'Roland::Table';
 

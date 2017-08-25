@@ -1,5 +1,7 @@
 package Roland::Roller::Test;
+
 # ABSTRACT: a roller pre-programmed with known results
+
 use Moose;
 with 'Roland::Roller';
 

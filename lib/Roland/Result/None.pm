@@ -1,5 +1,7 @@
 package Roland::Result::None;
+
 # ABSTRACT: no result!
+
 use Moose;
 with 'Roland::Result';
 
