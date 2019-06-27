@@ -10,8 +10,10 @@ perl bin/roland [file name]
 
 ## Stuff to Roll With 🎲
 
--  Magic 8 Ball  :sparkles: :8ball:
+- Magic 8 Ball  :sparkles: :8ball:
 
 - Sarcastic 9 Ball  🖕  **ಠ_ಠ**
 
 - Lunch at Work 🍱 🍕 🍔 🍗 🍝
+
+- Hobbies  🎮 📚 ✒️ 🎸 💻
